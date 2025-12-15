@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  // @apply bg-primary-dark text-text-light min-h-screen;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-default);
+  min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+}
+
+
+.app-container {
+  @apply container mx-auto p-4 sm:p-8;
+}
+:root {
+  --color-bg-primary: #ffffff ; /* White background */
+  --color-bg-secondary: #f0f0f087;/* Light gray cards/panels */
+  --color-text-default: #374151; 
+  --color-border-default: #2376f3;
+  --color-text-content: #6a6868;  /* Light gray borders */
+
+}
+/* Dark Theme */
+.dark {
+  --color-bg-primary: #0f0c1c;   /* Dark background */
+  --color-bg-secondary: #1e1b2e; /* Darker card/panel background */
+  --color-text-default: #e0e0e0; /* Light text */
+  --color-border-default: #374151; 
+  --color-text-content: #6a6868; /* Darker borders */
+}
+
+.text-text-default {
+  color: var(--color-text-default);
+}
+.text-primary {
+  color: #8b7bfd;
+}
+
+.bg-bg-primary {
+  background-color: var(--color-bg-primary);
+}
+
+.bg-bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+
+.border-default {
+  border-color: var(--color-border-default);
+}
+
+
+
+.text-gray-300 {
+  color: color-mix(in srgb, var(--color-text-default), 60% transparent);
+}
+.placeholder-text-gray-400{
+  color: color-mix(in srgb, var(--color-text-content), 40% transparent);
+}
+.text-gray-400 {
+  color: color-mix(in srgb, var(--color-text-default), 40% transparent);
+}
+
+.text-gray-500 {
+  color: color-mix(in srgb, var(--color-text-default), 20% transparent);
+}

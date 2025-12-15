@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Set the global background color
+body {
+  @apply bg-primary-dark text-text-light min-h-screen;
+}
+
+// Custom styles for the app shell/layout
+.app-container {
+  @apply container mx-auto p-4 sm:p-8;
+}
