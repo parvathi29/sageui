@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
         Simplify Testing. <span class="bg-gradient-to-r from-[#06b6d4] to-[#2563eb] bg-clip-text text-transparent">Amplify Quality</span>.
       </h1>
       <p class="text-lg text-gray-400 max-w-3xl mx-auto mb-10">
-        Your AI assistant for QA teams. Transform user stories, requirements, and recordings into comprehensive test cases and automation scripts — instantly.
+        Your AI assistant for QA teams. Transform user stories, requirements into comprehensive test cases and automation scripts — instantly.
       </p>
 
       <div class="flex justify-center space-x-6 mb-20">

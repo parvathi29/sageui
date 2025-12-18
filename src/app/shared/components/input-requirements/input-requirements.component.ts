@@ -18,7 +18,7 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
 
       <form [formGroup]="inputForm" (ngSubmit)="generateTestCases()" class="space-y-6">
         <div class="flex flex-col space-y-2">
-          <label for="inputType" class="text-sm font-medium text-gray-300">Input Type</label>
+          <label for="inputType" class="text-sm font-medium text-gray-500 dark:text-gray-300">Input Type</label>
           <select id="inputType" formControlName="inputType"
             class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight"
           >
@@ -110,7 +110,17 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
               At least one file is required for document upload.
           </p>
         </ng-container>
-
+        <div class="flex flex-col space-y-2 pt-2">
+          <label for="framework" class="text-sm font-medium text-gray-500 dark:text-gray-300">Framework</label>
+          <select id="framework" formControlName="framework"
+            class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
+          >
+            <option value="Java + Selenium">Java + Selenium</option>
+            <option value="JavaScript + TestComplete">JavaScript + TestComplete</option>
+            <option value="Python + Selenium">Python + Selenium</option>
+            <option value="JavaScript + Playwright">JavaScript + Playwright</option>
+          </select>
+        </div>
 
 
         <div class="flex justify-end pt-4">
@@ -143,9 +153,9 @@ export class InputRequirementsComponent implements OnInit{
   @Output() generationSuccess = new EventEmitter<any>(); // Emit result to parent
   
   isLoading: boolean = false;
-  // backendUrl = 'http://localhost:8000/api/generate-test-cases'; 
-  // Matches the FastAPI port
-  backendUrl='https://sagebackend-k8xg.onrender.com/api/generate-test-cases';
+  // backendUrl = 'http://localhost:8000/api/generate-test-cases'; // Matches the FastAPI port
+  
+  backendUrl='https://sagebackend-k8xg.onrender.com/functional-tests';
   inputForm!: FormGroup; // Initialize in ngOnInit
   uploadedFiles: File[] = [];
   currentInputType: InputType = 'Manual Input';
@@ -155,6 +165,7 @@ export class InputRequirementsComponent implements OnInit{
   ngOnInit(): void {
     this.inputForm = this.fb.group({
       inputType: ['Manual Input', Validators.required],
+      framework: ['Java + Selenium', Validators.required],
       userStory: ['', Validators.required],
       acceptanceCriteria: ['', Validators.required],
       fileInput: [null as File[] | null]
@@ -256,6 +267,7 @@ private updateValidation(type: InputType): void {
     if (inputType === 'Manual Input') {
       formData.append('user_story', this.inputForm.value.userStory);
       formData.append('acceptance_criteria', this.inputForm.value.acceptanceCriteria);
+      formData.append('framework_choice', this.inputForm.value.framework);
     } else if (inputType === 'Upload Document') {
       // Append all uploaded files to the form data
       this.uploadedFiles.forEach((file, index) => {

@@ -5,7 +5,7 @@ import { TestAutomationShellComponent } from './shared/components/test-automatio
   selector: 'app-root',
   standalone: true,
   // imports: [RouterOutlet],
-  imports: [ TestAutomationShellComponent],
+  imports: [RouterOutlet, TestAutomationShellComponent],
   // templateUrl: './app.component.html',
   // styleUrl: './app.component.scss'
   template: '<app-test-automation-shell></app-test-automation-shell>',
