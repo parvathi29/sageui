@@ -155,7 +155,8 @@ export class InputRequirementsComponent implements OnInit{
   isLoading: boolean = false;
   // backendUrl = 'http://localhost:8000/api/generate-test-cases'; // Matches the FastAPI port
   
-  backendUrl='https://sagebackend-k8xg.onrender.com/functional-tests';
+  // backendUrl='https://sagebackend-k8xg.onrender.com/functional-tests';
+  backendUrl='https://test-case-generation.onrender.com/functional-tests';
   inputForm!: FormGroup; // Initialize in ngOnInit
   uploadedFiles: File[] = [];
   currentInputType: InputType = 'Manual Input';
