@@ -30,9 +30,9 @@
   DB_Mock: any;
 }
   export interface GenerationResult {
-    high_priority: number;
-    medium_priority: number;
-    low_priority: number;
+    high_priority_count: number;
+    medium_priority_count: number;
+    low_priority_count: number;
     test_cases: TestCase[];
     automation_scripts: {[key:string]:AutomationScript};
   }
