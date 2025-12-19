@@ -182,9 +182,9 @@ export class TestAutomationShellComponent  {
       setTimeout(() => {
         // Dummy data for regeneration simulation
         this.generationData = {
-          high_priority: 2,
-          medium_priority: 2,
-          low_priority: 1,
+          high_priority_count: 2,
+          medium_priority_count: 2,
+          low_priority_count: 1,
           test_cases: [ /* same dummy data */ ] as TestCase[]
         } as GenerationResult;
       }, 4000);
