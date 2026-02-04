@@ -69,9 +69,9 @@ export class GenerationStatusComponent {
     key: keyof GenerationResult; 
     priority: 'High' | 'Medium' | 'Low'; 
   }[] = [
-    { label: 'High Priority', key: 'high_priority', priority: 'High' },
-    { label: 'Medium Priority', key: 'medium_priority', priority: 'Medium' },
-    { label: 'Low Priority', key: 'low_priority', priority: 'Low' },
+    { label: 'High Priority', key: 'high_priority_count', priority: 'High' },
+    { label: 'Medium Priority', key: 'medium_priority_count', priority: 'Medium' },
+    { label: 'Low Priority', key: 'low_priority_count', priority: 'Low' },
   ];
 
   getCardClasses(priority: 'High' | 'Medium' | 'Low'): string {
