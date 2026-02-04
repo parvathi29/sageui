@@ -1,9 +1,9 @@
-import { Component, Output, EventEmitter, inject, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, of } from 'rxjs';
+import { ProjectFolder } from '../models/test-automation.model';
 type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
 @Component({
   selector: 'app-input-requirements',
@@ -17,10 +17,26 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
       </p>
 
       <form [formGroup]="inputForm" (ngSubmit)="generateTestCases()" class="space-y-6">
+              <div class="flex flex-col space-y-2">
+          <label for="project" class="text-sm font-medium text-gray-500 dark:text-gray-300">Project Workspace</label>
+          <div class="flex space-x-2">
+            <select id="project" formControlName="projectId"
+              class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
+            >
+              <option value="" disabled>Select a project folder</option>
+              <option *ngFor="let proj of projects" [value]="proj.id">{{ proj.parentId && proj.parentId !== 'root' ? '— ' : '' }}{{ proj.name }}</option>
+            </select>
+            <button type="button" (click)="onCreateNewProject.emit()" 
+                    class="px-4 bg-highlight/10 text-highlight border border-highlight/30 rounded-lg hover:bg-highlight hover:text-white transition-all text-xs font-bold whitespace-nowrap">
+              + New Project
+            </button>
+          </div>
+          <p *ngIf="inputForm.controls['projectId'].invalid && inputForm.controls['projectId'].touched" class="text-[10px] text-priority-high">Please select a project destination.</p>
+        </div>
         <div class="flex flex-col space-y-2">
           <label for="inputType" class="text-sm font-medium text-gray-500 dark:text-gray-300">Input Type</label>
           <select id="inputType" formControlName="inputType"
-            class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight"
+            class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
           >
             <option value="Manual Input" class="hover:bg-highlight/10">Manual Input</option>
             <option value="Upload Document" class="hover:bg-highlight/10">Upload Document</option>
@@ -55,6 +71,20 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
             <p *ngIf="inputForm.controls['userStory'].invalid && inputForm.controls['userStory'].touched"
                class="mt-1 text-xs text-priority-high">
               User Story is required.
+            </p>
+          </div>
+
+          <div>
+            <label for="testDescription" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
+              Description of Test <span class="text-xs text-gray-500">(Test scope and objectives)</span>
+            </label>
+            <textarea id="testDescription" rows="4" formControlName="testDescription"
+              class="block p-2.5 w-full text-sm rounded-lg border bg-bg-primary border-border-default placeholder-gray-400 text-text-default focus:ring-highlight focus:border-highlight"
+              placeholder="Describe the scope, objectives, and key focus areas for this test..."
+            ></textarea>
+            <p *ngIf="inputForm.controls['testDescription'].invalid && inputForm.controls['testDescription'].touched"
+               class="mt-1 text-xs text-priority-high">
+              Test Description is required.
             </p>
           </div>
 
@@ -131,7 +161,7 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
               'bg-gray-600 cursor-not-allowed': inputForm.invalid || isLoading
             }"
           >
-            <span *ngIf="!isLoading">Generate Test Cases →</span>
+            <span *ngIf="!isLoading">Generat Job →</span>
             <span *ngIf="isLoading" class="flex items-center">
               Generating...
               <svg class="animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -144,20 +174,19 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
       </form>
     </div>
   `,
-  // styleUrl: './input-requirements.component.scss'
+  
 })
 export class InputRequirementsComponent implements OnInit{
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+   @Input() projects: ProjectFolder[] = []; 
+   @Output() onCreateNewProject = new EventEmitter<void>();
 
   @Output() generationSuccess = new EventEmitter<any>(); // Emit result to parent
   
   isLoading: boolean = false;
-  // backendUrl = 'http://localhost:8000/api/generate-test-cases'; // Matches the FastAPI port
-  
-  // backendUrl='https://sagebackend-k8xg.onrender.com/functional-tests';
-  backendUrl='https://test-case-generation.onrender.com/functional-tests';
-  inputForm!: FormGroup; // Initialize in ngOnInit
+
+  inputForm!: FormGroup; 
   uploadedFiles: File[] = [];
   currentInputType: InputType = 'Manual Input';
   isDragging: boolean = false;
@@ -165,13 +194,15 @@ export class InputRequirementsComponent implements OnInit{
 
   ngOnInit(): void {
     this.inputForm = this.fb.group({
+      projectId: ['', Validators.required], 
       inputType: ['Manual Input', Validators.required],
       framework: ['Java + Selenium', Validators.required],
       userStory: ['', Validators.required],
+      testDescription: ['', Validators.required],
       acceptanceCriteria: ['', Validators.required],
       fileInput: [null as File[] | null]
     });
-    // Listen for changes in inputType and update validators accordingly
+    // changes in inputType and update validators 
     this.inputForm.get('inputType')?.valueChanges.subscribe((type: InputType) => {
       this.currentInputType = type;
       this.updateValidation(type);
@@ -179,22 +210,26 @@ export class InputRequirementsComponent implements OnInit{
   }
 private updateValidation(type: InputType): void {
     const userStoryControl = this.inputForm.get('userStory');
+    const testDescriptionControl = this.inputForm.get('testDescription');
     const acceptanceCriteriaControl = this.inputForm.get('acceptanceCriteria');
     const fileInputControl = this.inputForm.get('fileInput');
 
     // Reset all
     userStoryControl?.clearValidators();
+    testDescriptionControl?.clearValidators();
     acceptanceCriteriaControl?.clearValidators();
     fileInputControl?.clearValidators();
 
     if (type === 'Manual Input') {
       userStoryControl?.setValidators(Validators.required);
+      testDescriptionControl?.setValidators(Validators.required);
       acceptanceCriteriaControl?.setValidators(Validators.required);
     } else if (type === 'Upload Document') {
       fileInputControl?.setValidators(Validators.required);
     }
 
     userStoryControl?.updateValueAndValidity();
+    testDescriptionControl?.updateValueAndValidity();
     acceptanceCriteriaControl?.updateValueAndValidity();
     fileInputControl?.updateValueAndValidity();
   }
@@ -235,7 +270,7 @@ private updateValidation(type: InputType): void {
 
   private addFiles(files: File[]): void {
     files.forEach(file => {
-      // Simple check to avoid duplicates, though Angular Forms handles complexity
+      //to avoid duplicates
       if (!this.uploadedFiles.some(f => f.name === file.name)) {
         this.uploadedFiles.push(file);
       }
@@ -262,38 +297,40 @@ private updateValidation(type: InputType): void {
 
     this.isLoading = true;
 
-    const formData = new FormData();
-    const inputType = this.inputForm.value.inputType;
-
-    if (inputType === 'Manual Input') {
-      formData.append('user_story', this.inputForm.value.userStory);
-      formData.append('acceptance_criteria', this.inputForm.value.acceptanceCriteria);
-      formData.append('framework_choice', this.inputForm.value.framework);
-    } else if (inputType === 'Upload Document') {
-      // Append all uploaded files to the form data
-      this.uploadedFiles.forEach((file, index) => {
-        formData.append(`file_${index}`, file, file.name);
-      });
-      // Use dummy data for backend processing requirement if no files are sent
-      formData.append('user_story', 'Document uploaded for analysis.');
-      formData.append('acceptance_criteria', 'Refer to attached files.');
+  
+    const val = this.inputForm.value;
+    // const inputType: InputType = val.inputType;
+    // const formData = new FormData();
+    const selectedProject = this.projects.find(proj => String(proj.id) === String(val.projectId));
+    const isSubProject = !!selectedProject?.parentId && String(selectedProject.parentId) !== 'root';
+    // If this is a sub-project, try to resolve the parent project's name
+    let parentName: string | null = null;
+    if (isSubProject) {
+      const parentProj = this.projects.find(p => String(p.id) === String(selectedProject?.parentId));
+      parentName = parentProj?.name ?? null;
     }
 
-    this.http.post<any>(this.backendUrl, formData)
-      .pipe(
-        catchError(error => {
-          console.error('Error generating test cases:', error);
-          this.isLoading = false;
-          // In a real app, show a user-friendly error message
-          alert('Failed to connect to the backend or generate test cases. Check console for details.');
-          return of(null);
-        })
-      )
-      .subscribe(result => {
-        if (result) {
-          this.isLoading = false;
-          this.generationSuccess.emit(result);
-        }
-      });
-  }
+const payload = {
+    user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
+    test_description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
+    acceptance_criteria: val.inputType === 'Manual Input' ? val.acceptanceCriteria : 'Refer to attached files.',
+    framework_choice: val.framework,
+    user_id: 0, // This will be overwritten by the Shell component before the actual HTTP call
+    project_name: isSubProject ? (parentName || '') : (selectedProject?.name || ''),
+    sub_project_name: isSubProject ? selectedProject?.name : null,
+    description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.'
+  };
+  this.generationSuccess.emit(payload);
+    //  else if (inputType === 'Upload Document') {
+    //   // Append all uploaded files to the form data
+    //   this.uploadedFiles.forEach((file, index) => {
+    //     formData.append(`file_${index}`, file, file.name);
+    //   });
+    //   // Use dummy data for backend processing requirement if no files are sent
+    //   formData.append('user_story', 'Document uploaded for analysis.');
+    //   formData.append('acceptance_criteria', 'Refer to attached files.');
+    // }
+
+  
+}
 }

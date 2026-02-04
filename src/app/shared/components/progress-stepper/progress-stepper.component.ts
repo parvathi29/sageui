@@ -9,8 +9,7 @@ interface Step {
   selector: 'app-progress-stepper',
   standalone: true,
   imports: [CommonModule],
-  // templateUrl: './progress-stepper.component.html',
-  // styleUrl: './progress-stepper.component.scss'
+
   template: `
     <div class="flex justify-between items-center text-center max-w-4xl mx-auto py-8">
       <ng-container *ngFor="let step of steps; let i = index">
@@ -46,7 +45,8 @@ export class ProgressStepperComponent {
 
   steps: Step[] = [
     { id: 1, label: 'Input', subLabel: 'User Story & Criteria' },
-    { id: 2, label: 'Generate', subLabel: 'AI Test Cases' },
+    // { id: 2, label: 'Generate', subLabel: 'AI Test Cases' },
+     { id:2, label: 'Scheduled Jobs', subLabel: 'Job in Queue' },
     { id: 3, label: 'Review', subLabel: 'Edit & Validate' },
     { id: 4, label: 'Export', subLabel: 'Deploy & Save' },
   ];

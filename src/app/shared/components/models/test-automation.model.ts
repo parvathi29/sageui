@@ -1,12 +1,4 @@
-// export interface TestCase {
-//     id: string;
-//     title: string;
-//     source: string;
-//     type: 'Functional' | 'UI' | 'Security'|any;
-//     priority: 'High' | 'Medium' | 'Low';
-//     status: 'Ready' | 'Draft';
-//     feedback:string|'';
-//   }
+
   export interface TestCase {
     ID: string;
     Title: string;
@@ -35,4 +27,33 @@
     low_priority: number;
     test_cases: TestCase[];
     automation_scripts: {[key:string]:AutomationScript};
+    job_info?: JobInfo;
   }
+  export interface ProjectFolder {
+  id: string;
+  name: string;
+  count: number;
+  isOpen?: boolean;
+  parentId?: string | null; // Null for root folders
+  subFolders?: ProjectFolder[];
+}
+export interface JobInfo {
+  job_id: string;
+  project_name: string;
+  project_id: string;
+  submitted_by: string;
+  completed_at: string;
+}
+export interface Tenant {
+  tenantId: number;
+  tenantName: string;
+  role: string;
+  accessLevel: number;
+}
+
+export interface UserSession {
+  userId: number;
+  displayName: string;
+  email: string;
+  tenants: Tenant[];
+}

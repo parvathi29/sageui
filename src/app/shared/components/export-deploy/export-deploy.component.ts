@@ -7,14 +7,14 @@ import { AlertBannerComponent } from '../alert-banner/alert-banner.component'; /
 interface ExportOption {
   label: string;
   description: string;
-  iconClass: string; // Use Tailwind classes for icons
+  iconClass: string; 
   message: string;
 }
 
 @Component({
   selector: 'app-export-deploy',
   standalone: true,
-  imports: [CommonModule, FormsModule, AlertBannerComponent], // Added FormsModule and AlertBanner
+  imports: [CommonModule, FormsModule, AlertBannerComponent], 
   template: `
     <div class="bg-bg-secondary p-8 rounded-xl shadow-2xl">
       <h2 class="text-2xl font-semibold mb-6 text-text-default">Export & Deploy</h2>
@@ -113,9 +113,9 @@ export class ExportDeployComponent {
 
   handleExport(option: ExportOption): void {
     // Simulate API call/download delay
-    this.successMessage = null; // Clear existing message
+    this.successMessage = null; 
     setTimeout(() => {
-      // Logic for actual download or API call would go here
+      // Logic for actual download 
       this.successMessage = option.message;
       console.log(`Action executed: ${option.label}`);
     }, 500); // 0.5s delay
@@ -124,7 +124,7 @@ export class ExportDeployComponent {
   pushToJira(): void {
     if (this.jiraUrl) {
       this.isJiraPushing = true;
-      this.successMessage = null; // Clear existing message
+      this.successMessage = null; 
       // Simulate API call delay for Jira integration
       setTimeout(() => {
         this.isJiraPushing = false;
