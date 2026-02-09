@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService, DashboardData } from '../../../core/services/api.service';
-
+import { DomSanitizer,SafeHtml} from '@angular/platform-browser';
 @Component({
   selector: 'app-dashbord',
   standalone: true,
@@ -90,7 +90,7 @@ import { ApiService, DashboardData } from '../../../core/services/api.service';
     </div>
   `
 })
-export class DashbordComponent {
+export class DashbordComponent implements OnInit{
   @Output() onNewGeneration = new EventEmitter();
   @Output() onViewJobs = new EventEmitter();
 stats: any[] = [];
@@ -99,7 +99,7 @@ stats: any[] = [];
   isLoading = true;
 
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService,private sanitizer: DomSanitizer) {}
  ngOnInit(): void {
     const userId = 1; // Later, get this from your Auth/JWT service
     this.loadDashboard(userId);
@@ -108,14 +108,14 @@ stats: any[] = [];
     this.api.getDashboardStats(userId).subscribe({
       next: (data: DashboardData) => {
         // Map the backend icons back to the stats array
-        const icons = [
+        const rawIcons = [
           '<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>',
           '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
           '<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>',
           '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>'
         ];
 
-        this.stats = data.stats.map((s, i) => ({ ...s, icon: icons[i] }));
+        this.stats = data.stats.map((s, i) => ({ ...s, icon:this.sanitizer.bypassSecurityTrustHtml(rawIcons[i]) }));
         this.recentJobs = data.recentJobs;
         this.jobStatusStats = data.jobStatusStats;
         this.isLoading = false;
@@ -136,33 +136,5 @@ stats: any[] = [];
 
 
 
-//   stats = [
-//     { label: 'Total Projects', value: '9', subtext: '4 root folders', icon: '<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>', trend: '', trendUp: false },
-//     { label: 'Test Cases', value: '319', subtext: '+12 this week', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', trend: '↗ 12% increase', trendUp: true },
-//     { label: 'Automation Scripts', value: '259', subtext: 'Java/Selenium framework', icon: '<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>', trend: '', trendUp: false },
-//     { label: 'Active Jobs', value: '4', subtext: '1 processing, 3 queued', icon: '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>', trend: 'LIVE', trendUp: true }
-//   ];
 
-//   recentJobs = [
-//     { name: 'Banking Portal', description: 'yyyyy', status: 'In Queue' },
-//     { name: 'Patient Records', description: 'HIPAA compliance tests', status: 'In Queue' },
-//     { name: 'Transaction Module', description: 'Wire transfer validations', status: 'In Queue' },
-//     { name: 'User Management', description: 'CRUD operations for users', status: 'In Progress' },
-//     { name: 'Payment Gateway', description: 'Stripe integration tests', status: 'Completed', testCount: 18 }
-//   ];
-
-//   jobStatusStats = [
-//     { label: 'Completed', value: 2, color: '#10b981' },
-//     { label: 'In Progress', value: 1, color: '#f59e0b' },
-//     { label: 'In Queue', value: 3, color: '#6b7280' }
-//   ];
-
-//   getStatusClasses(status: string) {
-//     switch (status) {
-//       case 'Completed': return 'bg-green-500/10 text-green-500 border-green-500/20';
-//       case 'In Progress': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
-//       case 'In Queue': return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-//       default: return '';
-//     }
-//   }
 }

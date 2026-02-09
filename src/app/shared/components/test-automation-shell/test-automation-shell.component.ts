@@ -117,7 +117,7 @@ type TestType = 'Functional' | 'Unit';
           <div class="p-6 space-y-8 flex-1">
             
             <nav class="space-y-1">
-              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Navigation</p>
+              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Portfolio</p>
               <button (click)="currentView.set('dashboard')" [ngClass]="{'bg-highlight/10 text-highlight': currentView() === 'dashboard'}" class="w-full flex items-center p-3 rounded-xl hover:bg-bg-primary text-gray-400 transition-all font-medium">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Dashboard
@@ -150,7 +150,7 @@ type TestType = 'Functional' | 'Unit';
       <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
     <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"></app-landing-page>
     <ng-container *ngIf="currentView() === 'dashboard'">
-      <app-dashbord (onNewGeneration)="currentView.set('new-generation')"></app-dashbord>
+      <app-dashbord (onNewGeneration)="currentView.set('new-generation')" (onViewJobs)="currentView.set('scheduled-jobs')"></app-dashbord>
     </ng-container>
     <app-scheduled-jobs *ngIf="currentView() === 'scheduled-jobs'" (onReview)="handleJobReview($event)"></app-scheduled-jobs>
 
