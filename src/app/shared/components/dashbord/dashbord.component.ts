@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService, DashboardData } from '../../../core/services/api.service';
 import { DomSanitizer,SafeHtml} from '@angular/platform-browser';
