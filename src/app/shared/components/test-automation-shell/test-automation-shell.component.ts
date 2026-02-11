@@ -249,7 +249,7 @@ export class TestAutomationShellComponent  {
   
   theme=inject(ThemeService);
   http = inject(HttpClient);
-  currentView = signal<AppView>('login');
+  currentView = signal<AppView>('landing');
   currentStep: number = 1;
   receivedData: any = null; 
   currentTestType: TestType = 'Functional';
