@@ -12,7 +12,7 @@ import { ExportDeployComponent } from '../export-deploy/export-deploy.component'
 import { FormsModule } from '@angular/forms';
 import { LandingPageComponent } from '../landing-page/landing-page.component';
 import { UnitTestInputComponent } from '../unit-test-input/unit-test-input.component'; 
-
+import{ OnboardingComponent } from '../onboarding/onboarding.component';
 import { ThemeService } from '../../../core/services/theme.service';
 import { HttpClient } from '@angular/common/http';
 import { DashbordComponent } from '../dashbord/dashbord.component';
@@ -22,7 +22,7 @@ import { ScheduledJobsComponent } from '../scheduled-jobs/scheduled-jobs.compone
 import { LoginComponent } from '../login/login.component';
 import { ApiService } from '../../../core/services/api.service';
 
-type AppView = 'login'|'landing' | 'dashboard' | 'new-generation' | 'scheduled-jobs';
+type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'new-generation' | 'scheduled-jobs';
 type TestType = 'Functional' | 'Unit'; 
 @Component({
   selector: 'app-test-automation-shell',
@@ -42,12 +42,17 @@ type TestType = 'Functional' | 'Unit';
     SidebarProjectsComponent,
     ProjectModelComponent,
     ScheduledJobsComponent,
-    LoginComponent
+        LoginComponent,
+    OnboardingComponent
 
   ],
   template: `
+    <app-onboarding 
+  *ngIf="currentView() === 'onboarding'" 
+  (goBack)="currentView.set('landing')">
+</app-onboarding>
   <app-login *ngIf="currentView() === 'login'" (loginSuccess)="handleLogin($event)"></app-login>
- <div *ngIf="currentView() !== 'login'" class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
+ <div *ngIf="currentView() !== 'login' && currentView() !== 'onboarding'" class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
           <div class="flex items-center space-x-3">
@@ -148,7 +153,9 @@ type TestType = 'Functional' | 'Unit';
         </aside>
 
       <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-    <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"></app-landing-page>
+       <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"
+      (tryDemo)="currentView.set('onboarding')">
+      </app-landing-page>
     <ng-container *ngIf="currentView() === 'dashboard'">
       <app-dashbord (onNewGeneration)="currentView.set('new-generation')" (onViewJobs)="currentView.set('scheduled-jobs')"></app-dashbord>
     </ng-container>
@@ -299,7 +306,7 @@ private updateNestedProjects(list: ProjectFolder[], parentId: string, newItem: P
     return this.generationData ? Object.keys(this.generationData.automation_scripts).length : 0;
   }
   onGetStarted() {
-    this.currentView.set('dashboard');
+   this.currentView.set('login');
     this.currentStep = 1;
   }
 
@@ -358,25 +365,7 @@ subscribe({
     });
 }
   
-  //   if (data) {
-    
-  //     setTimeout(() => {
-  //       this.generationData = data;
-  //     }, 4000); // 2 second simulation
-  //   } else {
-  //     // If regenerating, clear data and restart simulation (in a real app, call the backend again)
-  //     this.generationData = null;
-  //     setTimeout(() => {
-  //       // Dummy data for regeneration simulation
-  //       this.generationData = {
-  //         high_priority: 2,
-  //         medium_priority: 2,
-  //         low_priority: 1,
-  //         test_cases: [  ] as TestCase[]
-  //       } as GenerationResult;
-  //     }, 4000);
-  //   }
-  // }
+
 
   handleScheduledJobReview(job: any) {
     this.generationData = {
@@ -534,7 +523,7 @@ logout(): void {
   this.projects.set([]);
   
   // 2. Reset view to login
-  this.currentView.set('login');
+  this.currentView.set('landing');
   this.currentStep = 0;
   this.showUserMenu.set(false);
   
@@ -542,4 +531,8 @@ logout(): void {
   localStorage.removeItem('user_session');
   console.log('User logged out successfully');
 }
+handleTryDemo() {
+    // This opens the Onboarding Form (Google Form style)
+    this.currentView.set('onboarding');
+  }
 }

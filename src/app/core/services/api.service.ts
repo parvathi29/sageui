@@ -40,6 +40,9 @@ regenerateJob(id: string): Observable<any>
 { 
   return this.http.post<any>(`${this.baseUrl}/api/jobs/${id}/regenerate`, {});
  }
+  requestOnboarding(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/onboard/request`, payload);
+  }
 loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
    return this.http.get<ProjectFolder[]>(`${this.baseUrl}/api/projects/${displayName}`); 
   }
