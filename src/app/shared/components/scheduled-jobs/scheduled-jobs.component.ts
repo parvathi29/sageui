@@ -22,7 +22,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">{{ card.label }}</p>
           </div>
           <div class="p-3 bg-bg-primary rounded-full text-highlight">
-                       <svg [ngClass]="{'animate-spin': card.status === 'In Progress'}" 
+           <svg [ngClass]="{'animate-spin': card.status === 'In Progress'}" 
             class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
             [innerHTML]="card.icon">
            </svg>
@@ -113,8 +113,7 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
   showDeleteModal = false;
   jobToDelete: any = null;
   private sanitizer = inject(DomSanitizer);
-
-  summaryCards = [
+summaryCards = [
     { 
       label: 'In Queue', 
       status: 'In Queue', 
@@ -132,7 +131,11 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
     }
   ];
   constructor(private apiService: ApiService) {}
-  
+  // summaryCards = [
+  //   { label: 'In Queue', status: 'In Queue', icon: '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
+  //   { label: 'Processing', status: 'In Progress', icon: '<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>' },
+  //   { label: 'Completed', status: 'Completed', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' }
+  // ];
   ngOnInit() {
     this.loadJobs();
     window.addEventListener('click', () => this.activeMenuId = null);

@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Required for ngModel
-import { AlertBannerComponent } from '../alert-banner/alert-banner.component'; // New
+import { ToasterService } from '../../../core/services/toaster.service';
 
+import * as XLSX from 'xlsx';
 // Helper interface for the export options (defined in previous step)
 interface ExportOption {
   label: string;
@@ -14,17 +15,17 @@ interface ExportOption {
 @Component({
   selector: 'app-export-deploy',
   standalone: true,
-  imports: [CommonModule, FormsModule, AlertBannerComponent], 
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="bg-bg-secondary p-8 rounded-xl shadow-2xl">
       <h2 class="text-2xl font-semibold mb-6 text-text-default">Export & Deploy</h2>
       <p class="text-gray-400 mb-6">Your AI-powered testing control center</p>
 
-      <app-alert-banner 
+      <!-- <app-alert-banner 
         [message]="successMessage" 
         [type]="'success'" 
         (messageChange)="successMessage = $event">
-      </app-alert-banner>
+      </app-alert-banner> -->
 
       <div class="flex justify-around text-center mb-10 p-4 border border-gray-700 rounded-lg">
         <div>
@@ -96,10 +97,11 @@ interface ExportOption {
 export class ExportDeployComponent {
   @Input({ required: true }) totalTestCases: number = 0;
   @Input({ required: true }) totalAutomationScripts: number = 0;
-  
+    @Input() testCases: any[] = []; 
+    @Input() automationScripts: any = {};
   @Output() goBack = new EventEmitter<void>();
   @Output() startNew = new EventEmitter<void>();
-  
+  private toaster = inject(ToasterService);
   jiraUrl: string = '';
   successMessage: string | null = null;
   isJiraPushing: boolean = false;
@@ -111,16 +113,61 @@ export class ExportDeployComponent {
     { label: 'Export to GitHub', description: 'Push to repository', iconClass: 'github', message: 'Test suite pushed to GitHub repository!' },
   ];
 
-  handleExport(option: ExportOption): void {
-    // Simulate API call/download delay
-    this.successMessage = null; 
-    setTimeout(() => {
-      // Logic for actual download 
-      this.successMessage = option.message;
-      console.log(`Action executed: ${option.label}`);
-    }, 500); // 0.5s delay
+handleExport(option: any): void {
+    if (option.label.includes('CSV')) {
+      this.exportToExcelOrCsv('csv');
+    } else if (option.label.includes('Excel')) {
+      this.exportToExcelOrCsv('xlsx');
+    } else if (option.label.includes('Selenium')) {
+      this.downloadScripts();
+    }
   }
 
+
+private exportToExcelOrCsv(type: 'csv' | 'xlsx'): void {
+    if (this.testCases.length === 0) {
+      this.toaster.show('No test cases to export', 'error');
+      return;
+    }
+
+    // 1. Flatten the data for spreadsheet format
+    const dataToExport = this.testCases.map(tc => ({
+      ID: tc.ID,
+      Title: tc.Title,
+      Type: tc.Type,
+      Priority: tc.Priority,
+      Preconditions: tc.Preconditions,
+      Steps: tc.Steps,
+      Expected_Results: tc.ExpectedResults
+    }));
+    // 2. Create worksheet
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'TestCases');
+
+    // 3. Trigger Download
+    const fileName = `SageScript_Export_${new Date().getTime()}.${type}`;
+    XLSX.writeFile(wb, fileName, { bookType: type });
+    
+    this.toaster.show(`${type.toUpperCase()} downloaded successfully!`, 'success');
+  }
+
+  private downloadScripts(): void {
+    // Download automation scripts as a combined .txt or individual files
+    const scriptsString = Object.keys(this.automationScripts)
+      .map(key => `### ${key} ###\n${this.automationScripts[key].script.join('\n')}`)
+      .join('\n\n');
+
+    const blob = new Blob([scriptsString], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'automation_scripts.py';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    this.toaster.show('Python scripts downloaded!', 'success');
+  }
   pushToJira(): void {
     if (this.jiraUrl) {
       this.isJiraPushing = true;

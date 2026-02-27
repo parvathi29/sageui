@@ -39,7 +39,7 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
             class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
           >
             <option value="Manual Input" class="hover:bg-highlight/10">Manual Input</option>
-            <option value="Upload Document" class="hover:bg-highlight/10">Upload Document</option>
+            <option value="Upload Document" disabled class="text-gray-500">Upload Document</option>
             <option value="Fetch from DevOps" disabled class="text-gray-500">Fetch from DevOps (Coming Soon)</option>
             </select>
         </div>
@@ -311,6 +311,7 @@ private updateValidation(type: InputType): void {
     }
 
 const payload = {
+    projectId:Number(val.projectId),
     user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
     test_description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
     acceptance_criteria: val.inputType === 'Manual Input' ? val.acceptanceCriteria : 'Refer to attached files.',

@@ -1,7 +1,5 @@
-
-
 //app-test-automation-shell component
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProgressStepperComponent } from '../progress-stepper/progress-stepper.component';
 import { InputRequirementsComponent } from '../input-requirements/input-requirements.component';
@@ -22,6 +20,8 @@ import { ScheduledJobsComponent } from '../scheduled-jobs/scheduled-jobs.compone
 import { LoginComponent } from '../login/login.component';
 import { ApiService } from '../../../core/services/api.service';
 
+import { ToasterComponent } from "../../../toaster/toaster.component";
+import { ToasterService } from '../../../core/services/toaster.service';
 type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'new-generation' | 'scheduled-jobs';
 type TestType = 'Functional' | 'Unit'; 
 @Component({
@@ -33,7 +33,7 @@ type TestType = 'Functional' | 'Unit';
     ProgressStepperComponent,
     DashbordComponent,
     InputRequirementsComponent,
-    GenerationStatusComponent, 
+    GenerationStatusComponent,
     ReviewValidateComponent,
     FormsModule,
     ExportDeployComponent,
@@ -42,16 +42,18 @@ type TestType = 'Functional' | 'Unit';
     SidebarProjectsComponent,
     ProjectModelComponent,
     ScheduledJobsComponent,
-        LoginComponent,
-    OnboardingComponent
-
-  ],
+    LoginComponent,
+    OnboardingComponent,
+    ToasterComponent
+],
   template: `
-    <app-onboarding 
+
+  <app-onboarding 
   *ngIf="currentView() === 'onboarding'" 
   (goBack)="currentView.set('landing')">
 </app-onboarding>
   <app-login *ngIf="currentView() === 'login'" (loginSuccess)="handleLogin($event)"></app-login>
+
  <div *ngIf="currentView() !== 'login' && currentView() !== 'onboarding'" class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
@@ -65,6 +67,27 @@ type TestType = 'Functional' | 'Unit';
           </div>
         
           <div class="flex items-center space-x-4">
+            <div *ngIf="currentUser()?.payment_status === 'no'" 
+         class="hidden md:flex items-center px-3 py-1.5 bg-highlight/5 border border-highlight/20 rounded-xl mr-2">
+      <div class="flex flex-col items-end mr-3 leading-none">
+        <span class="text-[8px] font-black text-highlight uppercase tracking-tighter mb-0.5">Demo Progress</span>
+        <span class="text-[11px] font-bold text-text-default">
+          {{ currentUser()?.demo_attempts }}/10 <span class="text-gray-500 font-medium">Jobs</span>
+        </span>
+      </div>
+      <div class="relative w-8 h-8 flex items-center justify-center">
+        <svg class="w-full h-full transform -rotate-90">
+          <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2.5" fill="transparent" class="text-gray-800"/>
+          <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2.5" fill="transparent" 
+                  class="text-highlight transition-all duration-500"
+                  [attr.stroke-dasharray]="88" 
+                  [attr.stroke-dashoffset]="88 - (88 * (currentUser()?.demo_attempts || 0) / 10)"/>
+        </svg>
+        <svg class="absolute w-3 h-3 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+    </div>
        
             <button (click)="theme.toggleTheme()"class="p-1 rounded-full text-gray-500 hover:text-highlight transition-colors duration-150">
               
@@ -137,9 +160,9 @@ type TestType = 'Functional' | 'Unit';
               </button>
             </nav>
                <app-sidebar-projects
-  [projects]="projects()"
-  (toggle)="toggleProject($event)"
-  (onCreateRequest)="showprojmodel.set(true)">
+                [projects]="projects()"
+                (toggle)="toggleProject($event)"
+                (onCreateRequest)="showprojmodel.set(true)">
 </app-sidebar-projects>
 <app-project-model
   *ngIf="showprojmodel()"
@@ -153,12 +176,15 @@ type TestType = 'Functional' | 'Unit';
         </aside>
 
       <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-       <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"
-      (tryDemo)="currentView.set('onboarding')">
-      </app-landing-page>
+    <app-toaster></app-toaster>
+    <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"
+(tryDemo)="currentView.set('onboarding')">
+</app-landing-page>
+
     <ng-container *ngIf="currentView() === 'dashboard'">
       <app-dashbord (onNewGeneration)="currentView.set('new-generation')" (onViewJobs)="currentView.set('scheduled-jobs')"></app-dashbord>
     </ng-container>
+
     <app-scheduled-jobs *ngIf="currentView() === 'scheduled-jobs'" (onReview)="handleJobReview($event)"></app-scheduled-jobs>
 
    
@@ -195,7 +221,7 @@ type TestType = 'Functional' | 'Unit';
         <div *ngIf="!generationData; else statusContent" class="p-8 text-center bg-bg-secondary rounded-xl shadow-2xl">
           <h2 class="text-2xl font-semibold mb-4 text-primary">AI Test Case Generation</h2>
           <p class="text-gray-400 mb-6">AI is analyzing your user story and generating test cases</p>
-          <div class="flex justify-center my-8">
+            <div class="flex justify-center my-8">
             <svg class="animate-spin h-10 w-10 text-highlight" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -217,6 +243,9 @@ type TestType = 'Functional' | 'Unit';
           [testCases]="generationData?.test_cases || []"
           [automation_scripts]="generationData?.automation_scripts || {}"
           [jobInfo]="generationData?.job_info"
+          [projectId]="activeProjectId!"
+          [userId]="currentUser()?.userId!"
+          
           (exportAndDeploy)="currentStep = 4"
           (goBack)= "currentView.set('scheduled-jobs')"
           (addNewTestCase)="addNewTestCase()"
@@ -227,6 +256,8 @@ type TestType = 'Functional' | 'Unit';
           *ngIf="currentStep === 4"
           [totalTestCases]="generationData?.test_cases?.length || 0"
           [totalAutomationScripts]="scriptCount"
+          [testCases]="generationData?.test_cases || []"
+          [automationScripts]="generationData?.automation_scripts || {}"
           (goBack)="currentStep = 3"
           (startNew)="resetFlow()"
         ></app-export-deploy>
@@ -238,6 +269,25 @@ type TestType = 'Functional' | 'Unit';
     </div>
     </main>
     </div>
+
+
+    <div *ngIf="isLocked()" class="fixed inset-0 z-[200] bg-bg-primary/95 backdrop-blur-md flex items-center justify-center p-6 text-center">
+  <div class="max-w-md animate-fade-in">
+    <div class="w-20 h-20 bg-priority-high/20 text-priority-high rounded-3xl flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+    </div>
+    <h2 class="text-3xl font-black text-text-default mb-4">Subscription Required</h2>
+    <p class="text-gray-400 mb-8">You have completed your 10 free demo jobs. To continue generating professional test suites and automation scripts, please complete your enterprise payment.</p>
+    
+    <div class="bg-bg-secondary p-4 rounded-xl border border-border-default mb-8 text-sm text-gray-500">
+      Contact: <span class="text-highlight font-bold">billing&#64;sagescript.ai</span>
+    </div>
+    
+    <button (click)="isLocked.set(false); logout()" class="w-full py-4 bg-highlight text-white font-bold rounded-xl shadow-lg">
+      Return to Home
+    </button>
+  </div>
+</div>
     </div>
   `,
     styles: [`
@@ -246,7 +296,7 @@ type TestType = 'Functional' | 'Unit';
   `]
 })
 export class TestAutomationShellComponent  {
-  
+  private toaster = inject(ToasterService);
   theme=inject(ThemeService);
   http = inject(HttpClient);
   currentView = signal<AppView>('landing');
@@ -256,6 +306,8 @@ export class TestAutomationShellComponent  {
   generationData: GenerationResult | null = null;
   showprojmodel=signal(false);
   showUserMenu = signal(false);
+  isLocked=signal(false);
+projectId: string | null = null;
 projects = signal<ProjectFolder[]>([
   { id: '1', name: 'E-Commerce Platform', count: 45, subFolders: [] },
   { id: '2', name: 'Banking Portal', count: 67, subFolders: [] },
@@ -266,6 +318,8 @@ projects = signal<ProjectFolder[]>([
 currentUser = signal<UserSession | null>(null);
 
 constructor(private apiService: ApiService) {}
+
+
 private addToParent(
   list: ProjectFolder[],
   parentId: string,
@@ -292,6 +346,31 @@ private addToParent(
 
 }
 
+ngOnInit() {
+    // Listen for the interceptor's signal
+    window.addEventListener('force-logout-payment', () => {
+      this.handleLockdown();
+    });
+  }
+
+  handleLockdown() {
+    this.isLocked.set(true);
+    // Clear credentials but keep the "Locked" view visible
+    localStorage.removeItem('access_token');
+    this.currentUser.set(null);
+    this.currentView.set('login'); // Redirect to login background
+  }
+get activeProjectId(): string {
+  const currentProjectName = this.generationData?.job_info?.project_name;
+  if (!currentProjectName) return '';
+
+  // Flatten and search in your projects signal
+  const match = this.flatProjectsList.find(
+    p => p.name.toLowerCase() === currentProjectName.toLowerCase()
+  );
+  
+  return match ? match.id.toString() : '';
+}
 private updateNestedProjects(list: ProjectFolder[], parentId: string, newItem: ProjectFolder) {
   for (let folder of list) {
     if (folder.id === parentId) {
@@ -306,12 +385,14 @@ private updateNestedProjects(list: ProjectFolder[], parentId: string, newItem: P
     return this.generationData ? Object.keys(this.generationData.automation_scripts).length : 0;
   }
   onGetStarted() {
-   this.currentView.set('login');
+    this.currentView.set('login');
     this.currentStep = 1;
   }
 
 handleLogin(user: UserSession) {
   this.currentUser.set(user);
+  sessionStorage.setItem('access_token', user.access_token);
+  console.log('Login successful, token stored in sessionStorage:', user.access_token);
   this.currentView.set('dashboard');
   
   // Use the primary tenant's name or ID to load projects
@@ -335,37 +416,69 @@ handleLogin(user: UserSession) {
        console.error('No user or displayName available'); return;
 
      }
-    this.apiService.loadUserProjects(user?.displayName)
-      .subscribe({
-        next: (data) => this.projects.set(data),
-        error: (err) => console.error('Error loading projects', err)
-  });
-}
-  handleGeneration(payloadFromInput:any): void {
-    const user = this.currentUser();
+    this.apiService.loadUserProjects(user?.displayName).subscribe({
+      next: (data) => {
+        this.projects.set(data);
    
+        this.projectId = data[0]?.id || null;
+      },
+      error: (err) => console.error('Error loading projects', err),
+    });
+}
+  handleGeneration(payloadFromInput: any): void {
+    const user = this.currentUser();
     this.generationData = null;
 
-    if (!user) return;
+    if (!user || !this.projectId) {
+      console.error('User or projectId is missing');
+      return;
+    }
 
+    const finalPayload = {
+      ...payloadFromInput,
+      project_id: this.projectId,
+    };
 
-this.apiService.generateTestCases(payloadFromInput, user.userId).
-subscribe({ 
-
+    this.apiService.generateTestCases(finalPayload, user.userId).subscribe({
       next: (response: any) => {
-        // 2. Redirect user to Scheduled Jobs immediately
+        this.currentUser.update(curr => {
+          if (curr && curr.payment_status === 'no') {
+            return { ...curr, demo_attempts: curr.demo_attempts - 1 };
+          }
+          return curr;
+        });
         this.currentView.set('scheduled-jobs');
-        
-        // 3. Optional: Show a toast/notification
         console.log('Job submitted successfully. Tracking ID:', response.job_id);
       },
       error: (err) => {
-        alert('Failed to submit job. Please check backend.');
-      }
+        if (err.status === 402) {
+          this.isLocked.set(true); // Show the Subscription Required overlay
+        } else {
+          this.toaster.show("Generation failed: " + err.error.detail, "error");
+        }
+      },
     });
 }
   
-
+  //   if (data) {
+    
+  //     setTimeout(() => {
+  //       this.generationData = data;
+  //     }, 4000); // 2 second simulation
+  //   } else {
+  //     // If regenerating, clear data and restart simulation (in a real app, call the backend again)
+  //     this.generationData = null;
+  //     setTimeout(() => {
+  //       // Dummy data for regeneration simulation
+  //       this.generationData = {
+  //         high_priority: 2,
+  //         medium_priority: 2,
+  //         low_priority: 1,
+  //         test_cases: [  ] as TestCase[]
+  //       } as GenerationResult;
+  //     }, 4000);
+  //   }
+  // }
 
   handleScheduledJobReview(job: any) {
     this.generationData = {

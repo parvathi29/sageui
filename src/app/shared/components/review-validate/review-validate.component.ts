@@ -1,14 +1,17 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit,OnChanges,SimpleChanges, signal, computed, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { TestCase } from '../models/test-automation.model';
-
+import { ApiService } from '../../../core/services/api.service';
+import { AlertBannerComponent } from '../alert-banner/alert-banner.component';
+import { ToasterService } from '../../../core/services/toaster.service';
 @Component({
   selector: 'app-review-validate',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  styleUrls: ['./review-validate.component.scss'],
   template: `
     <div class="bg-bg-secondary p-8 rounded-xl shadow-2xl transition-all duration-300 border border-border-default">
           <h2 class="text-2xl font-semibold mb-4 text-text-default">Review & Validate</h2>
@@ -84,15 +87,14 @@ import { TestCase } from '../models/test-automation.model';
              <div class="col-span-1 flex items-center">
                 <span class="px-2.5 py-0.5 rounded text-[10px] font-black uppercase" [ngClass]="getPriorityClasses(tc.Priority)">{{ tc.Priority }}</span>
              </div>
-           <div class="col-span-2 flex justify-end space-x-3" (click)="$event.stopPropagation()">
-                <button (click)="toggleFeedback(tc, 'like')" [ngClass]="{'text-green-500': tc.feedback === 'like', 'text-gray-500': tc.feedback !== 'like'}" class="transition-colors hover:text-green-400" [innerHTML]="thumbUpSvg"></button>
-                <button (click)="toggleFeedback(tc, 'dislike')" [ngClass]="{'text-red-500': tc.feedback === 'dislike', 'text-gray-500': tc.feedback !== 'dislike'}" class="transition-colors hover:text-red-400" [innerHTML]="thumbDownSvg"></button>
+           <div class="col-span-2 flex justify-end space-x-3" >
+                
                  <button (click)="action('edit', tc.ID)" title="Edit" class="text-gray-400 hover:text-highlight">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 </button>
              <button 
              class="w-5 h-5 ransition-colors duration-200"
-                 (click)="toggleFeedback( tc,'like')" 
+                 (click)="onThumbsUp(tc.ID)"
                  title="Good feedback" 
                  [ngClass]="{'text-green-500': tc.feedback === 'like', 'text-gray-400': tc.feedback !== 'like'}"
                 [innerHTML]="thumbUpSvg">
@@ -100,7 +102,7 @@ import { TestCase } from '../models/test-automation.model';
 
             <button 
              class="w-5 h-5 transition-colors duration-200"
-             (click)="toggleFeedback( tc,'dislike')" 
+             (click)="onThumbsDown(tc.ID);$event.stopPropagation()"
              title="Bad feedback"
              [ngClass]="{'text-red-500': tc.feedback === 'dislike', 'text-gray-400': tc.feedback !== 'dislike'}"
              [innerHTML]="thumbDownSvg">
@@ -151,17 +153,29 @@ import { TestCase } from '../models/test-automation.model';
         </div>
       </div>
 
-      <div *ngIf="currentView === 'script'" class="flex h-[550px] border border-border-default rounded-2xl overflow-hidden bg-bg-primary/20">
-        <div class="w-56 border-r border-border-default bg-bg-secondary/50 overflow-y-auto custom-scrollbar">
-          <div class="p-4 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-border-default">Script Registry ({{ scriptKeys.length }})</div>
-          <div *ngFor="let key of scriptKeys" (click)="selectedScriptKey = key"
-               [ngClass]="{'bg-highlight/10 border-l-4 border-highlight shadow-inner': selectedScriptKey === key}"
-               class="p-5 cursor-pointer hover:bg-bg-primary/40 border-b border-gray-800/50 transition-all group">
-            <p class="text-sm font-black" [ngClass]="selectedScriptKey === key ? 'text-highlight' : 'text-text-default'">{{ key }}</p>
-            <p class="text-[10px] text-gray-500 font-bold uppercase">{{ automation_scripts[key]?.framework }}</p>
+      <div *ngIf="currentView === 'script'" class="script-viewer-container">
+      <div class="script-sidebar custom-scrollbar">
+         <div class="p-4 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-border-default">
+             Script Registry ({{ scriptKeys.length }})
           </div>
+         <div *ngFor="let key of scriptKeys; trackBy: trackByKey" 
+            (click)="selectScript(key, $event)"
+           [ngClass]="{
+           'bg-highlight/10 border-l-4 border-highlight shadow-inner': selectedScriptKey === key,
+           'hover:bg-bg-primary/40': selectedScriptKey !== key
+            }"
+          class="p-5 cursor-pointer border-b border-gray-800/50 transition-all group">
+    
+           <p class="text-sm font-black" 
+           [ngClass]="selectedScriptKey === key ? 'text-highlight' : 'text-text-default'">
+           {{ key }}
+           </p>
+          <p class="text-[10px] text-gray-500 font-bold ">
+           {{ automation_scripts[key]?.framework }}
+          </p>
+       </div>
         </div>
-        <div class="flex-1 flex flex-col bg-bg-primary/30 relative">
+        <div class="script-content-area">
           <div class="flex justify-between items-center p-5 border-b border-border-default bg-bg-secondary/30">
             <div>
                 <h3 class="text-xs font-black text-text-default uppercase tracking-widest">{{ automation_scripts[selectedScriptKey]?.framework }}</h3>
@@ -175,7 +189,7 @@ import { TestCase } from '../models/test-automation.model';
                 <button class="bg-highlight hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-highlight/20 active:scale-95 transition-all">Save Script</button>
             </div>
           </div>
-          <div class="flex-1 overflow-auto p-8 font-mono text-[11px] custom-scrollbar bg-bg-primary/10 select-all">
+          <div class="flex-1 overflow-auto p-8 font-mono text-[11px] custom-scrollbar bg-bg-primary/10">
             <div class="flex">
                 <div class="text-right pr-6 text-gray-700 select-none border-r border-gray-800/50 mr-6">
                     <div *ngFor="let line of getActiveScript(); let i = index" class="leading-7">{{ i + 1 }}</div>
@@ -207,14 +221,17 @@ import { TestCase } from '../models/test-automation.model';
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
-export class ReviewValidateComponent implements OnInit {
+export class ReviewValidateComponent implements OnInit,OnChanges {
+  private toaster = inject(ToasterService);
   @Input() testCases: TestCase[] = [];
   @Input() automation_scripts: any = {};
   @Input() jobInfo: any = null;
   @Output() exportAndDeploy = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
   @Output() addNewTestCase = new EventEmitter<void>();
-
+  @Input() projectId!: string;
+  @Input() userId!: number;
+ 
   // State
   thumbUpSvg: SafeHtml = '';
   thumbDownSvg: SafeHtml = '';
@@ -223,6 +240,13 @@ export class ReviewValidateComponent implements OnInit {
   testDataTabs: { [key: string]: 'Inputs' | 'API' | 'DB' } = {};
   selectedScriptKey: string = '';
   scriptKeys: string[] = [];
+  alertMessage: string | null = null;
+  alertType: 'success' | 'info' | 'error' = 'success';
+
+showAlert(message: string, type: 'success' | 'info' | 'error' = 'success') {
+  this.alertMessage = message;
+  this.alertType = type;
+}
   
   // Filtering & Pagination
   searchTerm = '';
@@ -230,15 +254,34 @@ export class ReviewValidateComponent implements OnInit {
   currentPage = 1;
   pageSize = 5;
 
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
+  constructor(private apiservice: ApiService, private sanitizer: DomSanitizer,private http: HttpClient) {}
 
   ngOnInit() {
     this.loadIcons();
-    this.scriptKeys = Object.keys(this.automation_scripts);
-    if (this.scriptKeys.length > 0) this.selectedScriptKey = this.scriptKeys[0];
+     console.log('ReviewValidateComponent initialized with projectId:', this.projectId, 'and userId:', this.userId);
+    // this.scriptKeys = Object.keys(this.automation_scripts);
+    // if (this.scriptKeys.length > 0) this.selectedScriptKey = this.scriptKeys[0];
   }
-
+ngOnChanges(changes: SimpleChanges) {
+    if (changes['automation_scripts'] && this.automation_scripts) {
+      this.scriptKeys = Object.keys(this.automation_scripts);
+      
+      // 3. Ensure a script is selected if none is currently active
+      if (!this.selectedScriptKey && this.scriptKeys.length > 0) {
+        this.selectedScriptKey = this.scriptKeys[0];
+      }
+    }
+  }
   // Logic Helpers
+
+  trackByKey(index: number, key: string) {
+  return key; 
+}
+  selectScript(key: string, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedScriptKey = key;
+  }
   get filteredTestCases() {
     return this.testCases.filter(tc => {
       const matchSearch = tc.Title.toLowerCase().includes(this.searchTerm.toLowerCase()) || tc.ID.toLowerCase().includes(this.searchTerm.toLowerCase());
@@ -277,7 +320,7 @@ export class ReviewValidateComponent implements OnInit {
     }
   }
 
-  toggleFeedback(tc: any, type: 'like' | 'dislike') { tc.feedback = tc.feedback === type ? null : type; }
+
   action(type: string, id: string) { console.log(`Action ${type} on ${id}`); }
   copyScript() { navigator.clipboard.writeText(this.getActiveScript().join('\n')); alert('Copied!'); }
 
@@ -285,4 +328,43 @@ export class ReviewValidateComponent implements OnInit {
     this.http.get('/assets/icons/thumb-up.svg', { responseType: 'text' }).subscribe(s => this.thumbUpSvg = this.sanitizer.bypassSecurityTrustHtml(s));
     this.http.get('/assets/icons/thumb-down.svg', { responseType: 'text' }).subscribe(s => this.thumbDownSvg = this.sanitizer.bypassSecurityTrustHtml(s));
   }
+
+  onThumbsUp(testCaseId: string) {
+  const payload = {
+    user_id: this.userId,
+    project_id: Number(this.projectId),
+    test_case_id: testCaseId,
+    feedback_type: 'POSITIVE'
+  };
+  this.apiservice.sendQuickFeedback(payload).subscribe({
+     next: () => {
+    this.toaster.show("Thanks for the feedback!", "success");
+  },
+  error: () => {
+    this.toaster.show("Something went wrong!", "error");
+  }
+    });
+  }
+  onThumbsDown(testCaseId: string) {
+  const feedbackMsg = prompt("Please provide feedback for " + testCaseId + ":");
+  
+  if (feedbackMsg) {
+    const payload = {
+      user_id: this.userId,
+      project_id: this.projectId,
+      test_case_id: testCaseId,
+      feedback_description: feedbackMsg,
+      feedback_type: 'NEGATIVE'
+    };
+
+    this.apiservice.sendDetailedFeedback(payload).subscribe({
+      next: () => {
+        this.toaster.show("Feedback submitted. We'll improve the generation!", "success");
+      },
+      error: () => {
+        this.toaster.show("Failed to submit feedback.", "error");
+      }
+    });
+  }
+}
 }

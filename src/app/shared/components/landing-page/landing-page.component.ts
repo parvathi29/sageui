@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
           Get Started
           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
-         <button (click)="tryDemo.emit()" class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 border border-gray-600">
+        <button (click)="tryDemo.emit()" class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 border border-gray-600">
           Try Demo
         </button>
       </div>
@@ -49,7 +49,8 @@ import { CommonModule } from '@angular/common';
 })
 export class LandingPageComponent {
   @Output() getStarted = new EventEmitter<void>();
- @Output() tryDemo = new EventEmitter<void>();
+  @Output() tryDemo = new EventEmitter<void>();
+
   featureCards = [
     {
       title: 'Generate Test Cases',

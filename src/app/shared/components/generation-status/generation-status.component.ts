@@ -19,8 +19,8 @@ import { GenerationResult } from '../models/test-automation.model';
         </div>
       </div>
 
-      <div class="bg-bg-primary p-6 rounded-lg">
-        <div class="flex items-center mb-4">
+      <div class="bg-bg- primary p-6 rounded-lg">
+        <div class="flex items-center mb-4"> 
           <svg class="w-6 h-6 text-highlight mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <h3 class="text-xl font-semibold text-text-default">Generation Complete</h3>
         </div>
@@ -69,9 +69,9 @@ export class GenerationStatusComponent {
     key: keyof GenerationResult; 
     priority: 'High' | 'Medium' | 'Low'; 
   }[] = [
-    { label: 'High Priority', key: 'high_priority_count', priority: 'High' },
-    { label: 'Medium Priority', key: 'medium_priority_count', priority: 'Medium' },
-    { label: 'Low Priority', key: 'low_priority_count', priority: 'Low' },
+    { label: 'High Priority', key: 'high_priority', priority: 'High' },
+    { label: 'Medium Priority', key: 'medium_priority', priority: 'Medium' },
+    { label: 'Low Priority', key: 'low_priority', priority: 'Low' },
   ];
 
   getCardClasses(priority: 'High' | 'Medium' | 'Low'): string {

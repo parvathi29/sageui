@@ -1,6 +1,6 @@
 .code-box {
-  max-height: 220px;          /* Adjust scroll height */
-  overflow-y: auto;
+  flex-grow: 1;
+  overflow: auto;
   background-color: #1f2937;  /* Tailwind gray-800 */
   padding: 12px;
   border-radius: 6px;
@@ -21,7 +21,32 @@
     border-radius: 8px;
   }
 }
-button svg {
+// button svg {
+//   width: 100%;
+//   height: 100%;
+// }
+.script-viewer-container {
+  display: flex !important;
+  flex-direction: row !important;
   width: 100%;
-  height: 100%;
+  height: 550px; /* Fixed height to match your UI */
+  overflow: hidden; 
+  position: relative;
+}
+.script-sidebar {
+  width: 100px;       /* Equivalent to w-56 */
+  flex-shrink: 0;     /* Prevent the script viewer from squashing the menu */
+  // z-index: 10;        /* Keep it above the content area */
+  border-right: 1px solid #374151;
+  background-color: #111827; /* Darker bg to differentiate from code */
+  overflow-y: auto;
+}
+
+/* Script Content Area Fix */
+.script-content-area {
+  flex-grow: 1;
+  min-width: 0;       /* Critical: allows flex child to shrink/scroll instead of overflowing */
+  display: flex;
+  flex-direction: column;
+  background-color: #1f2937;
 }

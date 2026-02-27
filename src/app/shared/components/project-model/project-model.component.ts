@@ -35,6 +35,18 @@ import { ProjectFolder } from '../models/test-automation.model';
               <option *ngFor="let p of flatProjects" [value]="p.id">{{ p.name }}</option>
             </select>
           </div>
+           
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Project Description
+            </label>
+            <textarea 
+              [(ngModel)]="projectSpec"
+              rows="4"
+              placeholder="Enter project details, goals, scope..."
+              class="w-full p-3 bg-bg-primary border border-border-default rounded-xl text-text-default focus:ring-2 focus:ring-highlight/50 focus:border-highlight outline-none transition-all resize-none">
+            </textarea>
+          </div>
 
           <button (click)="submit()" [disabled]="!newProjectName"
                   class="w-full py-4 bg-purple-400 hover:bg-purple-500 text-black font-extrabold rounded-xl transition-all shadow-lg shadow-cyan-400/20 active:scale-[0.98] disabled:opacity-50">
@@ -53,15 +65,17 @@ export class ProjectModelComponent {
   newProjectName = '';
   selectedParentId = 'root';
   description ='';
+  projectSpec = '';
   submit() {
 
     const payload = {
     name: this.newProjectName, 
     parentId: this.selectedParentId, 
-    description: this.description || null 
+    project_spec: this.projectSpec || null 
   };
     this.onCreate.emit(payload);
     this.newProjectName = '';
+    this.projectSpec = '';
     this.onClose.emit();
   }
 }

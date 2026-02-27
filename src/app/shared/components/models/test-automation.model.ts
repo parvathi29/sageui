@@ -22,9 +22,9 @@
   DB_Mock: any;
 }
   export interface GenerationResult {
-    high_priority_count: number;
-    medium_priority_count: number;
-    low_priority_count: number;
+    high_priority: number;
+    medium_priority: number;
+    low_priority: number;
     test_cases: TestCase[];
     automation_scripts: {[key:string]:AutomationScript};
     job_info?: JobInfo;
@@ -56,4 +56,7 @@ export interface UserSession {
   displayName: string;
   email: string;
   tenants: Tenant[];
+  access_token: string;
+  demo_attempts: number; 
+  payment_status: 'yes' | 'no';
 }

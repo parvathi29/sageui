@@ -40,9 +40,6 @@ regenerateJob(id: string): Observable<any>
 { 
   return this.http.post<any>(`${this.baseUrl}/api/jobs/${id}/regenerate`, {});
  }
-  requestOnboarding(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/onboard/request`, payload);
-  }
 loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
    return this.http.get<ProjectFolder[]>(`${this.baseUrl}/api/projects/${displayName}`); 
   }
@@ -51,13 +48,17 @@ loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
   `${this.baseUrl}/api/projects/${userName}?tenantId=${tenantId}`);
  }
 
-
+ requestOnboarding(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/onboard/request`, payload);
+  }
 
  generateTestCases(payload: any, userId: number):
   Observable<any> { 
   const finalPayload = {
-     ...payload, user_id: userId 
+     ...payload, user_id: userId, 
+    project_id: Number(payload.projectId),
     };
+    console.log('Final payload for test case generation:', finalPayload);
      return this.http.post<any>(`${this.baseUrl}/api/generate-test-cases`, finalPayload);
      }
 
@@ -78,5 +79,12 @@ createProject(modalData: { name: string; parentId: string; description?: string 
 
      getDashboardStats(userId: number): Observable<DashboardData> {
     return this.http.get<DashboardData>(`${this.baseUrl}/api/dashboard/${userId}`);
+  }
+
+  sendQuickFeedback(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/feedback/quick`, payload);
+  }
+    sendDetailedFeedback(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/feedback/detailed`, payload);
   }
 }
