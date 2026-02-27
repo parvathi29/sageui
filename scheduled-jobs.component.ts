@@ -1,11 +1,9 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { interval, Subscription, switchMap, tap } from 'rxjs';
+import { interval, Subscription, switchMap } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ToasterService } from '../../../core/services/toaster.service'; // Ensure this path is correct
-
 @Component({
   selector: 'app-scheduled-jobs',
   standalone: true,
@@ -100,7 +98,7 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
         </div>
       </div>
     </div>
-    `,
+   `,
   styles: [`
     .animate-fade-in { animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -108,21 +106,14 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
 })
 export class ScheduledJobsComponent implements OnInit, OnDestroy {
   @Output() onReview = new EventEmitter<any>();
-  
   private http = inject(HttpClient);
-  private apiService = inject(ApiService);
-  private sanitizer = inject(DomSanitizer);
-  private toaster = inject(ToasterService); // 1. Inject Toaster Service
-
   private pollSub?: Subscription;
-  private notifiedJobIds = new Set<string>(); // 2. Tracking Set to avoid spamming toasters
-
   jobs: any[] = [];
   activeMenuId: string | null = null;
   showDeleteModal = false;
   jobToDelete: any = null;
-
-  summaryCards = [
+  private sanitizer = inject(DomSanitizer);
+summaryCards = [
     { 
       label: 'In Queue', 
       status: 'In Queue', 
@@ -139,42 +130,25 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
       icon: this.sanitizer.bypassSecurityTrustHtml('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>') 
     }
   ];
-
+  constructor(private apiService: ApiService) {}
+  // summaryCards = [
+  //   { label: 'In Queue', status: 'In Queue', icon: '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
+  //   { label: 'Processing', status: 'In Progress', icon: '<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>' },
+  //   { label: 'Completed', status: 'Completed', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' }
+  // ];
   ngOnInit() {
-    // 3. Populate notified set on first load so we don't toast old completed jobs
-    this.loadJobs(true);
-    
+    this.loadJobs();
     window.addEventListener('click', () => this.activeMenuId = null);
-
-    // 4. Enhanced Polling logic
+    // UI Polling method: every 10 seconds
     this.pollSub = interval(10000).pipe(
-      switchMap(() => this.http.get<any[]>(this.apiService.jobsurl)),
-      tap(data => this.processJobStatusNotifications(data))
+      switchMap(() => this.http.get<any[]>(this.apiService.jobsurl))
     ).subscribe(data => this.jobs = data);
   }
 
-  ngOnDestroy() { 
-    this.pollSub?.unsubscribe(); 
-  }
+  ngOnDestroy() { this.pollSub?.unsubscribe(); }
 
-  // 5. Logic to trigger toaster only on fresh completions
-  private processJobStatusNotifications(newJobs: any[]) {
-    newJobs.forEach(job => {
-      if (job.status === 'Completed' && !this.notifiedJobIds.has(job.id)) {
-        this.toaster.show(`Job for ${job.project} is now ready for review!`, 'success');
-        this.notifiedJobIds.add(job.id);
-      }
-    });
-  }
-
-  loadJobs(isInitial: boolean = false) {
-    this.http.get<any[]>(this.apiService.jobsurl).subscribe(data => {
-      this.jobs = data;
-      if (isInitial) {
-        // Mark existing completed jobs as already notified
-        data.filter(j => j.status === 'Completed').forEach(j => this.notifiedJobIds.add(j.id));
-      }
-    });
+  loadJobs() {
+    this.http.get<any[]>(this.apiService.jobsurl).subscribe(data => this.jobs = data);
   }
   
   toggleMenu(id: string, event: Event) {
@@ -182,12 +156,12 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
     this.activeMenuId = this.activeMenuId === id ? null : id;
   }
 
-  regenerateJob(id: string): void {
-    this.apiService.regenerateJob(id).subscribe({ 
-      next: () => this.loadJobs(), 
-      error: (err) => console.error('Error regenerating job', err) 
-    }); 
+regenerateJob(id: string): void {
+   this.apiService.regenerateJob(id).subscribe({ 
+    next: () => this.loadJobs(), 
+    error: (err) => console.error('Error regenerating job', err) }); 
   }
+  
 
   openDeleteConfirm(job: any) {
     this.jobToDelete = job;
@@ -195,20 +169,22 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
     this.activeMenuId = null;
   }
 
-  confirmDelete(): void {
-    if (!this.jobToDelete) return;
-    this.apiService.deleteJob(this.jobToDelete.id).subscribe({ 
-      next: () => { 
-        this.showDeleteModal = false;
-        this.loadJobs();
-      }, 
-      error: (err) => console.error('Error deleting job', err)
-    }); 
+confirmDelete(): void {
+   if (!this.jobToDelete)
+    return;
+   this.apiService.deleteJob(this.jobToDelete.id).subscribe({ 
+    next: () => { 
+    this.showDeleteModal = false;
+     this.loadJobs();
+    }, 
+    error: (err) =>
+    console.error('Error deleting job', err)
+   }); 
   }
 
   getCount(status: string) { 
     return this.jobs.filter(j => j.status === status).length;
-  }
+   }
 
   getStatusClasses(status: string) {
     switch (status) {
