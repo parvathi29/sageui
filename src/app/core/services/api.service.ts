@@ -62,14 +62,14 @@ loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
      return this.http.post<any>(`${this.baseUrl}/api/generate-test-cases`, finalPayload);
      }
 
-createProject(modalData: { name: string; parentId: string; description?: string | null }, userId: number):
+createProject(modalData: { name: string; parentId: string; project_spec?: string | null }, userId: number):
       Observable<any> {
          const finalPayload =
           { 
              name: modalData.name,
              parentId: modalData.parentId, 
              user_id: userId, 
-             description: modalData.description ?? null 
+             project_spec: modalData.project_spec ?? null 
             };
              return this.http.post<any>(`${this.baseUrl}/api/projects/create`, finalPayload);
              }
