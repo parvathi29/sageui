@@ -10,6 +10,7 @@ interface ExportOption {
   description: string;
   iconClass: string; 
   message: string;
+  disabled?: boolean; 
 }
 
 @Component({
@@ -73,12 +74,11 @@ interface ExportOption {
           <input type="url" placeholder="https://your-org.atlassian.net/browse/PROJECT"
             class="flex-grow p-2.5 text-sm rounded-lg border bg-bg-primary border-gray-700 placeholder-gray-500 text-white focus:ring-highlight focus:border-highlight"
             [(ngModel)]="jiraUrl">
-          <button (click)="pushToJira()"
-            class="bg-highlight hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
-            [disabled]="!jiraUrl || isJiraPushing">
-            <span *ngIf="!isJiraPushing">Push</span>
-            <span *ngIf="isJiraPushing">Pushing...</span>
-          </button>
+<button
+  class="bg-gray-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium cursor-not-allowed opacity-50"
+  disabled>
+  Push
+</button>
         </div>
       </div>
 
@@ -107,10 +107,10 @@ export class ExportDeployComponent {
   isJiraPushing: boolean = false;
 
   exportOptions: ExportOption[] = [
-    { label: 'Download as CSV', description: 'Spreadsheet format', iconClass: 'download', message: 'CSV file downloaded successfully!' },
-    { label: 'Export to Excel', description: 'Download as .xlsx', iconClass: 'download', message: 'Excel file downloaded successfully!' },
-    { label: 'Generate Selenium Script', description: 'Python automation', iconClass: 'python', message: 'Selenium script generated and downloaded!' },
-    { label: 'Export to GitHub', description: 'Push to repository', iconClass: 'github', message: 'Test suite pushed to GitHub repository!' },
+    { label: 'Download as CSV', description: 'Download Functional Test Cases', iconClass: 'download', message: 'Functional test cases downloaded successfully!' },
+    { label: 'Export to Excel', description: 'Download Functional Test Cases ', iconClass: 'download', message: 'Functional test cases downloaded successfully!' },
+    { label: 'Export Automation Scripts', description: 'Download automation scripts', iconClass: 'download', message: 'Automation script generated and downloaded!' },
+    { label: 'Export to GitHub', description: 'Push to repository', iconClass: 'github', message: 'Test suite pushed to GitHub repository!',disabled: true },
   ];
 
 handleExport(option: any): void {
@@ -118,7 +118,7 @@ handleExport(option: any): void {
       this.exportToExcelOrCsv('csv');
     } else if (option.label.includes('Excel')) {
       this.exportToExcelOrCsv('xlsx');
-    } else if (option.label.includes('Selenium')) {
+    } else if (option.label.includes('Scripts')) {
       this.downloadScripts();
     }
   }
@@ -162,11 +162,11 @@ private exportToExcelOrCsv(type: 'csv' | 'xlsx'): void {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'automation_scripts.py';
+    a.download = 'automation_scripts.txt';
     a.click();
     window.URL.revokeObjectURL(url);
     
-    this.toaster.show('Python scripts downloaded!', 'success');
+    this.toaster.show('Automation scripts downloaded!', 'success');
   }
   pushToJira(): void {
     if (this.jiraUrl) {
@@ -181,3 +181,12 @@ private exportToExcelOrCsv(type: 'csv' | 'xlsx'): void {
     }
   }
 }
+
+
+
+          // <button (click)="pushToJira()"
+          //   class="bg-highlight hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+          //   [disabled]="!jiraUrl || isJiraPushing">
+          //   <span *ngIf="!isJiraPushing">Push</span>
+          //   <span *ngIf="isJiraPushing">Pushing...</span>
+          // </button>
