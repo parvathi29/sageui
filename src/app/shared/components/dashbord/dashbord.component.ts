@@ -120,7 +120,22 @@ export class DashbordComponent implements OnInit{
 
         this.stats = data.stats.map((s, i) => ({ ...s, icon:this.sanitizer.bypassSecurityTrustHtml(rawIcons[i]) }));
         this.recentJobs = data.recentJobs;
-        this.jobStatusStats = data.jobStatusStats;
+
+        // Ensure the dashboard always shows a "Failed" bucket (fallback 0)
+        // and preserves the order/labels we want to show in the UI.
+        const defaults = [
+          { label: 'Completed', value: 0, color: '#10b981' },
+          { label: 'In Progress', value: 0, color: '#f59e0b' },
+          { label: 'In Queue', value: 0, color: '#6b7280' },
+          { label: 'Failed', value: 0, color: '#ef4444' }
+        ];
+
+        const apiStats = Array.isArray(data.jobStatusStats) ? data.jobStatusStats : [];
+        this.jobStatusStats = defaults.map((d) => {
+          const match = apiStats.find((s: any) => s.label?.toLowerCase() === d.label.toLowerCase());
+          return match ? { ...d, ...match } : d;
+        });
+
         this.isLoading = false;
       },
       error: (err) => {
@@ -133,6 +148,7 @@ export class DashbordComponent implements OnInit{
     const s = status.toLowerCase();
         if (s.includes('completed')) return 'bg-green-500/10 text-green-500 border-green-500/20';
     if (s.includes('progress')) return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+    if (s.includes('fail')) return 'bg-red-500/10 text-red-500 border-red-500/20';
     return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
   }
 

@@ -24,7 +24,7 @@ import { ToasterService } from '../../../core/services/toaster.service';
              <span class="text-[10px] font-bold uppercase tracking-widest">Project: {{ jobInfo?.project_id || 'PROJ-001' }}</span>
           </div>
           <h2 class="text-3xl font-black text-text-default">{{ jobInfo?.project_name || 'Banking Portal' }}</h2>
-          <p class="text-gray-500 text-xs mt-1">Job ID: {{ jobInfo?.job_id || 'JOB-C100' }} • Completed: {{ jobInfo?.completed_at || 'Jan 02, 2026' }}</p>
+          <p class="text-gray-500 text-xs mt-1">Job ID: {{ jobInfo?.job_id || 'JOB-C100' }} • Completed: {{ jobInfo?.submitted_at || 'Jan 02, 2026' }}</p>
         </div>
         <div class="flex space-x-3">
            <button (click)="addNewTestCase.emit()" class="bg-highlight text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition-all shadow-lg shadow-highlight/20 flex items-center">
@@ -162,9 +162,9 @@ import { ToasterService } from '../../../core/services/toaster.service';
             (click)="selectScript(key, $event)"
            [ngClass]="{
            'bg-highlight/10 border-l-4 border-highlight shadow-inner': selectedScriptKey === key,
-           'hover:bg-bg-primary/40': selectedScriptKey !== key
+           'hover:bg-bg-primary': selectedScriptKey !== key
             }"
-          class="p-5 cursor-pointer border-b border-gray-800/50 transition-all group">
+          class="p-5 cursor-pointer border-b border-border-default transition-all group">
     
            <p class="text-sm font-black" 
            [ngClass]="selectedScriptKey === key ? 'text-highlight' : 'text-text-default'">
@@ -176,13 +176,13 @@ import { ToasterService } from '../../../core/services/toaster.service';
        </div>
         </div>
         <div class="script-content-area">
-          <div class="flex justify-between items-center p-5 border-b border-border-default bg-bg-secondary/30">
+          <div class="flex justify-between items-center p-5 border-b border-border-default bg-bg-secondary">
             <div>
                 <h3 class="text-xs font-black text-text-default uppercase tracking-widest">{{ automation_scripts[selectedScriptKey]?.framework }}</h3>
                 <p class="text-[10px] text-gray-500 font-bold">Generated Artifact • {{ selectedScriptKey }}</p>
             </div>
             <div class="flex space-x-4">
-                <button (click)="copyScript()" class="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors group">
+                <button (click)="copyScript()" class="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-text-default transition-colors group">
                     <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     Copy Source
                 </button>
@@ -314,9 +314,9 @@ ngOnChanges(changes: SimpleChanges) {
 
   getPriorityClasses(priority: string): string {
     switch (priority) {
-      case 'High': return 'bg-red-900/40 text-red-400 border border-red-800/50';
-      case 'Medium': return 'bg-yellow-900/30 text-yellow-500 border border-yellow-800/40';
-      default: return 'bg-green-900/30 text-green-500 border border-green-800/40';
+      case 'High': return 'bg-red-500/40 text-red-400 border border-red-800/50';
+      case 'Medium': return 'bg-yellow-500/30 text-yellow-500 border border-yellow-800/40';
+      default: return 'bg-green-500/30 text-green-500 border border-green-800/40';
     }
   }
 

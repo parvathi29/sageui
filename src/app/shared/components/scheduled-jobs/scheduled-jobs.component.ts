@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -41,7 +42,7 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
         <div class="space-y-4">
           <div *ngFor="let job of jobs" class="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl bg-bg-primary/30 border border-border-default hover:border-highlight/40 transition-all group">
             <div class="flex items-center space-x-5">
-              <div class="relative">
+              <div class="relative"> 
                 <svg [ngClass]="job.status === 'In Progress' ? 'animate-spin text-amber-500' : 'text-gray-500'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path *ngIf="job.status !== 'Completed'" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   <path *ngIf="job.status === 'Completed'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" class="text-green-500"/>
@@ -58,12 +59,26 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
                 <p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">Submitted: {{ job.submitted }}</p>
               </div>
             </div>
+            <div class="mt-4 w-full max-w-xs">
+            <div class="flex items-center space-x-4">
+            <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden border border-border-default">
+           <div 
+          class="h-full transition-all duration-1000 ease-out rounded-full"
+          [ngClass]="job.status === 'Completed' ? 'bg-green-500' : 'bg-highlight'"
+          [style.width.%]="job.progress || 0">
+          </div>
+        </div>
 
+            <span class="text-[11px] font-black text-gray-500 min-w-[30px]">
+             {{ job.progress || 0 }}%
+            </span> 
+         </div>
+        </div>
             <div class="mt-4 md:mt-0 flex items-center space-x-4">
               <div *ngIf="job.status === 'Completed'" class="text-right">
                 <p class="text-sm font-black text-text-default">{{ job.tests }} tests</p>
                 <p class="text-[10px] text-gray-500 uppercase font-bold">Generated</p>
-              </div>
+              </div> 
               <button *ngIf="job.status === 'Completed'" (click)="onReview.emit(job)" 
                       class="bg-highlight hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-highlight/20 active:scale-95">
                 Review & Edit
@@ -137,7 +152,12 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
       label: 'Completed', 
       status: 'Completed', 
       icon: this.sanitizer.bypassSecurityTrustHtml('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>') 
-    }
+    },
+    { 
+    label: 'Failed', 
+    status: 'Failed', 
+    icon: this.sanitizer.bypassSecurityTrustHtml('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>') 
+  }
   ];
 
   ngOnInit() {

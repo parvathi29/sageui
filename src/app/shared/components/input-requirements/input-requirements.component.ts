@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ProjectFolder } from '../models/test-automation.model';
 type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
+type TestType = 'functional' | 'api' | 'database';
 @Component({
   selector: 'app-input-requirements',
   standalone: true,
@@ -33,6 +34,22 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
           </div>
           <p *ngIf="inputForm.controls['projectId'].invalid && inputForm.controls['projectId'].touched" class="text-[10px] text-priority-high">Please select a project destination.</p>
         </div>
+
+
+         <div class="flex flex-col space-y-2">
+             <label  class="text-sm font-medium text-gray-500 dark:text-gray-300">
+              Test Type
+              </label>
+
+            <select formControlName="testType"
+         class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
+          >
+        <option value="functional">Functional Test Case</option>
+        <option value="api">API Testing</option>
+        <option value="database">Database Script Generation</option>
+        </select>
+        </div>
+
         <div class="flex flex-col space-y-2">
           <label for="inputType" class="text-sm font-medium text-gray-500 dark:text-gray-300">Input Type</label>
           <select id="inputType" formControlName="inputType"
@@ -44,6 +61,71 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
             </select>
         </div>
 
+        <div *ngIf="!showDatabaseOptions" class="flex flex-col space-y-2 pt-2">
+         <label class="text-sm font-medium text-gray-500">
+Framework
+</label>
+<select formControlName="framework" class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
+
+<option *ngFor="let fw of frameworkOptions" [value]="fw.value">
+{{fw.key}}
+</option>
+
+</select>
+</div>
+<!-- OTHER FRAMEWORK -->
+
+<div *ngIf="showOtherFrameworkInput">
+
+<input
+type="text"
+formControlName="otherFramework"
+placeholder="Enter framework name"
+class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
+
+</div>
+<!-- DATABASE OPTIONS -->
+
+<div *ngIf="showDatabaseOptions" class="flex flex-col space-y-2">
+  <label class="text-sm font-medium text-gray-500">
+Target Database
+</label>
+
+<select formControlName="targetDatabase" class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
+
+<option *ngFor="let db of databaseOptions" [value]="db.value">
+{{db.key}}
+</option>
+
+</select>
+</div>
+<!-- OTHER DATABASE -->
+
+<div *ngIf="showOtherDatabaseInput">
+
+<input
+type="text"
+formControlName="otherDatabase"
+placeholder="Enter database name"
+class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
+</div>
+
+
+<!-- JSON DATA MODEL -->
+
+<div *ngIf="showDatabaseOptions">
+
+<label class="text-sm font-medium text-gray-500">
+Upload Data Model (JSON)
+</label>
+
+<input
+type="file"
+accept=".json"
+(change)="onDataModelUpload($event)"
+class="block w-full text-sm mt-2">
+
+</div>
       <ng-container *ngIf="currentInputType === 'Manual Input'">
           
           <div class="p-4 bg-bg-primary rounded-lg  border-border-default flex items-start space-x-3 transition-colors duration-300">
@@ -52,13 +134,13 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
                    <div class="flex flex-col leading-tight"> 
                     <h4 class="text-sm font-semibold text-text-default mb-2">Sample Format</h4>
                       <p class="text-xs text-gray-600 dark:text-gray-400">
- <span class="font-mono">User Story:</span> "As a [role], I want to [action] so that [benefit]"
-</p>
-<p class="text-xs text-gray-600 dark:text-gray-400">
-<span class="font-mono">Acceptance Criteria:</span> Use Given-When-Then format
-</p>
-</div>
- </div>
+                   <span class="font-mono">User Story:</span> "As a [role], I want to [action] so that [benefit]"
+                   </p>
+                   <p class="text-xs text-gray-600 dark:text-gray-400">
+                        <span class="font-mono">Acceptance Criteria:</span> Use Given-When-Then format
+                   </p>
+                   </div>
+                  </div>
 
           <div>
             <label for="userStory" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
@@ -140,17 +222,7 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
               At least one file is required for document upload.
           </p>
         </ng-container>
-        <div class="flex flex-col space-y-2 pt-2">
-          <label for="framework" class="text-sm font-medium text-gray-500 dark:text-gray-300">Framework</label>
-          <select id="framework" formControlName="framework"
-            class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
-          >
-            <option value="Java + Selenium">Java + Selenium</option>
-            <option value="JavaScript + TestComplete">JavaScript + TestComplete</option>
-            <option value="Python + Selenium">Python + Selenium</option>
-            <option value="JavaScript + Playwright">JavaScript + Playwright</option>
-          </select>
-        </div>
+
 
 
         <div class="flex justify-end pt-4">
@@ -171,6 +243,9 @@ type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
             </span>
           </button>
         </div>
+
+
+       
       </form>
     </div>
   `,
@@ -185,29 +260,152 @@ export class InputRequirementsComponent implements OnInit{
   @Output() generationSuccess = new EventEmitter<any>(); // Emit result to parent
   
   isLoading: boolean = false;
-
+frameworkOptions: {key:string,value:string}[] = [];
+showOtherFrameworkInput = false;
   inputForm!: FormGroup; 
   uploadedFiles: File[] = [];
   currentInputType: InputType = 'Manual Input';
   isDragging: boolean = false;
+  showDatabaseOptions = false;
+showOtherDatabaseInput = false;
+uploadedDataModel: File | null = null;
+databaseOptions = [
+{ key:'Azure SQL', value:'Azure SQL'},
+{ key:'PostgreSQL', value:'PostgreSQL'},
+{ key:'SQLite', value:'SQLite'},
+{ key:'MySQL', value:'MySQL'},
+{ key:'Other', value:'other'}
+];
+frameworkConfig: Record<TestType, any> = {
+  functional: [
+    { key: 'Java + Selenium', value: 'Java + Selenium' },
+    { key: 'JavaScript + TestComplete', value: 'JavaScript + TestComplete' },
+    { key: 'Python + Selenium', value: 'Python + Selenium' },
+    { key: 'JavaScript + Playwright', value: 'JavaScript + Playwright' }
+  ],
+
+  api: [
+    { key: 'Postman', value: 'postman' },
+    { key: 'Bruno', value: 'bruno' },
+    { key: 'Insomnia', value: 'insomnia' },
+    { key: 'Other', value: 'other' }
+  ],
+  database: undefined
+};
+
 
 
   ngOnInit(): void {
     this.inputForm = this.fb.group({
-      projectId: ['', Validators.required], 
+      projectId:['',Validators.required], 
+      testType:['functional',Validators.required], 
+    
+      otherFramework:[''],
+      targetDatabase:[''],
+      otherDatabase:[''],
+      dataModelFile:[null],
       inputType: ['Manual Input', Validators.required],
-      framework: ['Java + Selenium', Validators.required],
+      framework: ['', Validators.required],
       userStory: ['', Validators.required],
       testDescription: ['', Validators.required],
       acceptanceCriteria: ['', Validators.required],
       fileInput: [null as File[] | null]
     });
     // changes in inputType and update validators 
-    this.inputForm.get('inputType')?.valueChanges.subscribe((type: InputType) => {
-      this.currentInputType = type;
-      this.updateValidation(type);
-    });
+/* INITIAL FRAMEWORK */
+
+this.frameworkOptions = this.frameworkConfig['functional'];
+this.inputForm.patchValue({
+framework:this.frameworkOptions[0].value
+});/* TEST TYPE CHANGE */
+
+this.inputForm.get('testType')?.valueChanges.subscribe((type:TestType)=>{
+
+if(type === 'database'){
+
+this.showDatabaseOptions = true;
+
+this.inputForm.get('framework')?.clearValidators();
+
+this.inputForm.get('targetDatabase')?.setValidators(Validators.required);
+this.inputForm.get('dataModelFile')?.setValidators(Validators.required);
+
+}
+
+else{
+
+this.showDatabaseOptions = false;
+
+this.frameworkOptions = this.frameworkConfig[type];
+
+this.inputForm.patchValue({
+framework:this.frameworkOptions[0].value
+});
+
+this.inputForm.get('framework')?.setValidators(Validators.required);
+
+}
+
+this.inputForm.get('framework')?.updateValueAndValidity();
+
+});
+
+
+/* OTHER FRAMEWORK */
+
+this.inputForm.get('framework')?.valueChanges.subscribe(val=>{
+
+this.showOtherFrameworkInput = val === 'other';
+
+const control = this.inputForm.get('otherFramework');
+
+if(val === 'other'){
+control?.setValidators(Validators.required);
+}
+else{
+control?.clearValidators();
+control?.setValue('');
+}
+
+control?.updateValueAndValidity();
+
+});
+
+
+/* OTHER DATABASE */
+
+this.inputForm.get('targetDatabase')?.valueChanges.subscribe(val=>{
+
+this.showOtherDatabaseInput = val === 'other';
+
+const control = this.inputForm.get('otherDatabase');
+
+if(val === 'other'){
+control?.setValidators(Validators.required);
+}
+else{
+control?.clearValidators();
+}
+
+control?.updateValueAndValidity();
+
+});
+
+
   }
+  onDataModelUpload(event:any){
+
+const file = event.target.files[0];
+
+if(file){
+
+this.uploadedDataModel = file;
+
+this.inputForm.get('dataModelFile')?.setValue(file);
+
+}
+
+}
 private updateValidation(type: InputType): void {
     const userStoryControl = this.inputForm.get('userStory');
     const testDescriptionControl = this.inputForm.get('testDescription');
@@ -295,32 +493,64 @@ private updateValidation(type: InputType): void {
       return;
     }
 
-    this.isLoading = true;
 
   
     const val = this.inputForm.value;
+    const testTypeMap: any = {
+    functional: 'automation_test',
+    api: 'api_test',
+    database: 'database_script'
+    };
+
+
+    this.isLoading = true;
     // const inputType: InputType = val.inputType;
     // const formData = new FormData();
     const selectedProject = this.projects.find(proj => String(proj.id) === String(val.projectId));
     const isSubProject = !!selectedProject?.parentId && String(selectedProject.parentId) !== 'root';
-    // If this is a sub-project, try to resolve the parent project's name
+  
     let parentName: string | null = null;
     if (isSubProject) {
       const parentProj = this.projects.find(p => String(p.id) === String(selectedProject?.parentId));
       parentName = parentProj?.name ?? null;
     }
+    const frameworkChoice = val.framework === 'other' ? 'other' : val.framework;
 
-const payload = {
+const payload :any = {
     projectId:Number(val.projectId),
     user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
+    test_type:testTypeMap[val.testType],
     test_description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
     acceptance_criteria: val.inputType === 'Manual Input' ? val.acceptanceCriteria : 'Refer to attached files.',
-    framework_choice: val.framework,
-    user_id: 0, // This will be overwritten by the Shell component before the actual HTTP call
+    framework_choice: val.framework === 'other' ? 'other' : val.framework,
+    user_id: 0, 
     project_name: isSubProject ? (parentName || '') : (selectedProject?.name || ''),
     sub_project_name: isSubProject ? selectedProject?.name : null,
-    description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.'
+    description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
+   
   };
+
+
+if (val.framework === 'other') {
+  payload.user_request= val.otherFramework;
+}
+
+/* DATABASE PAYLOAD */
+
+if(val.testType === 'database'){
+
+payload.target_database =
+val.targetDatabase === 'other'
+? val.otherDatabase
+: val.targetDatabase;
+
+if(val.targetDatabase === 'other'){
+payload.user_request = val.otherDatabase;
+}
+
+payload.data_model = this.uploadedDataModel;
+
+}
   this.generationSuccess.emit(payload);
     //  else if (inputType === 'Upload Document') {
     //   // Append all uploaded files to the form data

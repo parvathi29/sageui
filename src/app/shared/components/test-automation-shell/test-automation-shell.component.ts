@@ -58,18 +58,17 @@ type TestType = 'Functional' | 'Unit';
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
           <div class="flex items-center space-x-3">
-          
+            <img src="src/assets/Sagescript-logo.png" alt="SageScript Logo" class="w-8 h-8">
             <svg width="20px" height="20px" viewBox="0 0 512 512" id="icons" xmlns="http://www.w3.org/2000/svg"><path d="M259.92,262.91,216.4,149.77a9,9,0,0,0-16.8,0L156.08,262.91a9,9,0,0,1-5.17,5.17L37.77,311.6a9,9,0,0,0,0,16.8l113.14,43.52a9,9,0,0,1,5.17,5.17L199.6,490.23a9,9,0,0,0,16.8,0l43.52-113.14a9,9,0,0,1,5.17-5.17L378.23,328.4a9,9,0,0,0,0-16.8L265.09,268.08A9,9,0,0,1,259.92,262.91Z" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="108 68 88 16 68 68 16 88 68 108 88 160 108 108 160 88 108 68" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="426.67 117.33 400 48 373.33 117.33 304 144 373.33 170.67 400 240 426.67 170.67 496 144 426.67 117.33" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>
              <div class="flex flex-col leading-tight">
             <span class="text-[20px] font-semibold" style="color:#8b7bfd;">Sage Script</span>
             <span class="text-[10px] text-gray-400 -mt-0.5">Automated testing powered by AI</span>
           </div>
-          </div>
-        
-          <div class="flex items-center space-x-4">
-            <div *ngIf="currentUser()?.payment_status === 'no'" 
+        </div>
+        <div class="flex items-center space-x-4">
+        <div *ngIf="currentUser()?.payment_status === 'no'" 
          class="hidden md:flex items-center px-3 py-1.5 bg-highlight/5 border border-highlight/20 rounded-xl mr-2">
-      <div class="flex flex-col items-end mr-3 leading-none">
+        <div class="flex flex-col items-end mr-3 leading-none">
         <span class="text-[8px] font-black text-highlight uppercase tracking-tighter mb-0.5">Demo Progress</span>
         <span class="text-[11px] font-bold text-text-default">
           {{ currentUser()?.demo_attempts }}/10 <span class="text-gray-500 font-medium">Jobs</span>
@@ -85,10 +84,9 @@ type TestType = 'Functional' | 'Unit';
         </svg>
         <svg class="absolute w-3 h-3 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-      </div>
+      </svg>
+      </div>   
     </div>
-       
             <button (click)="theme.toggleTheme()"class="p-1 rounded-full text-gray-500 hover:text-highlight transition-colors duration-150">
               
               <svg *ngIf="theme.isDarkTheme()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -200,10 +198,10 @@ type TestType = 'Functional' | 'Unit';
               </button>
               <button (click)="currentTestType = 'Unit'"
                [ngClass]="{
-    'bg-highlight text-white shadow-md': currentTestType === 'Unit',
-    'text-gray-500 dark:text-gray-300': currentTestType !== 'Unit',
-    'opacity-40 cursor-not-allowed grayscale pointer-events-none': true
-  }"
+               'bg-highlight text-white shadow-md': currentTestType === 'Unit',
+              'text-gray-500 dark:text-gray-300': currentTestType !== 'Unit',
+               'opacity-40 cursor-not-allowed grayscale pointer-events-none': true
+                  }"
                 class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                 Unit Test Cases
