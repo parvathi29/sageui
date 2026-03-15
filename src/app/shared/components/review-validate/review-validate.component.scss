@@ -1,23 +1,23 @@
 .code-box {
   flex-grow: 1;
   overflow: auto;
-  background-color: #1f2937;  /* Tailwind gray-800 */
+  background-color: var(--color-bg-secondary);
   padding: 12px;
   border-radius: 6px;
 
   /* Scrollbar styling - works in Chrome, Edge, Brave, Safari */
   scrollbar-width: thin;          /* Firefox */
-  scrollbar-color: #4b5563 #1f2937; /* thumb + track */
+  scrollbar-color: color-mix(in srgb, var(--color-text-default), 60% transparent) var(--color-bg-secondary); /* thumb + track */
 
   &::-webkit-scrollbar {
     width: 8px;
   }
   &::-webkit-scrollbar-track {
-    background: #1f2937; /* gray-800 */
+    background: var(--color-bg-secondary);
     border-radius: 8px;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: #4b5563; /* gray-600 */
+    background-color: color-mix(in srgb, var(--color-text-default), 60% transparent);
     border-radius: 8px;
   }
 }
@@ -37,8 +37,8 @@
   width: 100px;       /* Equivalent to w-56 */
   flex-shrink: 0;     /* Prevent the script viewer from squashing the menu */
   // z-index: 10;        /* Keep it above the content area */
-  border-right: 1px solid #374151;
-  background-color: #111827; /* Darker bg to differentiate from code */
+  border-right: 1px solid var(--color-border-default);
+  background-color: var(--color-bg-secondary);
   overflow-y: auto;
 }
 
@@ -48,5 +48,5 @@
   min-width: 0;       /* Critical: allows flex child to shrink/scroll instead of overflowing */
   display: flex;
   flex-direction: column;
-  background-color: #1f2937;
+  background-color: var(--color-bg-primary);
 }

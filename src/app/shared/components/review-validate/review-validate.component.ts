@@ -203,7 +203,7 @@ import { ToasterService } from '../../../core/services/toaster.service';
       </div>
 
       <div class="flex justify-between mt-10 pt-8 border-t border-gray-800">
-        <button (click)="goBack.emit()" class="text-gray-500 hover:text-white flex items-center font-black text-[10px] uppercase tracking-widest transition-all">
+        <button (click)="goBack.emit()" class="text-gray-500 hover:text-primary flex items-center font-black text-[10px] uppercase tracking-widest transition-all">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7 7-7"/></svg>
           Return to Dashboard
         </button>

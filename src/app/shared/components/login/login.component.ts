@@ -15,8 +15,8 @@ import { ApiService } from '../../../core/services/api.service';
           <div class="p-3 bg-highlight/10 rounded-2xl mb-4">
              <svg width="40" height="40" viewBox="0 0 512 512"><path d="M259.92,262.91,216.4,149.77a9,9,0,0,0-16.8,0L156.08,262.91a9,9,0,0,1-5.17,5.17L37.77,311.6a9,9,0,0,0,0,16.8l113.14,43.52a9,9,0,0,1,5.17,5.17L199.6,490.23a9,9,0,0,0,16.8,0l43.52-113.14a9,9,0,0,1,5.17-5.17L378.23,328.4a9,9,0,0,0,0-16.8L265.09,268.08A9,9,0,0,1,259.92,262.91Z" fill="none" stroke="#8b7bfd" stroke-width="32"/></svg>
           </div>
-          <h1 class="text-3xl font-black text-text-default tracking-tighter">Sage Script</h1>
-          <p class="text-gray-500 text-sm mt-1 uppercase font-bold tracking-widest">Enterprise SSO Login</p>
+          <h1 class="text-3xl font-black text-text-default tracking-tighter">SageScript</h1>
+          <p class="text-gray-500 text-sm mt-1 uppercase font-bold tracking-widest">Enterprise Login</p>
         </div>
 
         <form (ngSubmit)="onLogin()" class="space-y-6">

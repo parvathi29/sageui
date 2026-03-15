@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Required for ngModel
 import { ToasterService } from '../../../core/services/toaster.service';
-
+import JSZip from 'jszip';
 import * as XLSX from 'xlsx';
 // Helper interface for the export options (defined in previous step)
 interface ExportOption {
@@ -43,20 +43,17 @@ interface ExportOption {
       </div>
 
       <h3 class="text-xl font-semibold text-text-default mb-4">Export & Integration Options</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div *ngFor="let option of exportOptions" (click)="handleExport(option)" class="p-4 bg-bg-primary rounded-lg border border-border-default hover:border-highlight transition-colors duration-200 cursor-pointer flex items-start space-x-4">
+      <div class="grid grid-cols-1 gap-6">
+              <div *ngFor="let option of exportOptions" 
+             (click)="option.disabled ? null : downloadProjectBundle()" 
+             [ngClass]="{'opacity-50 cursor-not-allowed': option.disabled}"
+             class="p-6 bg-bg-primary rounded-lg border border-border-default hover:border-highlight transition-all cursor-pointer flex items-center space-x-6">
           
-          <svg class="w-6 h-6 text-highlight flex-shrink-0 mt-1" [ngClass]="option.iconClass" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <ng-container *ngIf="option.iconClass.includes('download')">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </ng-container>
-            <ng-container *ngIf="option.iconClass.includes('github')">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
-            </ng-container>
-            <ng-container *ngIf="option.iconClass.includes('python')">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l-4-4m0 0l-4-4m4 4h12M4 10l-4 4m0 0l4 4"></path>
-            </ng-container>
-          </svg>
+  <div class="p-4 bg-highlight/10 rounded-full text-highlight">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+          </div>
           
           <div>
             <p class="text-text-default font-medium">{{ option.label }}</p>
@@ -82,7 +79,7 @@ interface ExportOption {
       </div>
 
       <div class="flex justify-start mt-8">
-        <button (click)="goBack.emit()" class="text-gray-400 hover:text-white flex items-center">
+        <button (click)="goBack.emit()" class="text-gray-400 hover:text-primary flex items-center">
           <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
           Back
         </button>
@@ -106,109 +103,78 @@ export class ExportDeployComponent {
   isJiraPushing: boolean = false;
 
   exportOptions: ExportOption[] = [
-    { label: 'Download as CSV', description: 'Download Functional Test Cases', iconClass: 'download', message: 'Functional test cases downloaded successfully!' },
-    { label: 'Export to Excel', description: 'Download Functional Test Cases ', iconClass: 'download', message: 'Functional test cases downloaded successfully!' },
-    { label: 'Export Automation Scripts', description: 'Download automation scripts', iconClass: 'python', message: 'Automation script generated and downloaded!' },
-    { label: 'Export to GitHub', description: 'Push to repository', iconClass: 'github', message: 'Test suite pushed to GitHub repository!',disabled: true },
+    { 
+      label: 'Download Project Bundle (.zip)', 
+      description: 'Includes Excel Test Cases and framework-specific Automation Scripts', 
+      iconClass: 'download', 
+      message: 'Project bundle generated successfully!' 
+    }
   ];
-private readonly FRAMEWORK_EXTENSIONS: { [key: string]: string } = {
-    'Selenium': 'py',
-    'Playwright': 'js',
-    'Cypress': 'js',
-    'REST Assured': 'java',
-    'Database': 'sql'
-  };
-handleExport(option: any): void {
-    if (option.label.includes('CSV')) {
-      this.exportToExcelOrCsv('csv');
-    } else if (option.label.includes('Excel')) {
-      this.exportToExcelOrCsv('xlsx');
-   } else if (option.label.includes('Automation')) {
-      this.downloadScripts(); // This now handles dynamic formats
+  private getExtension(frameworkStr: string): string {
+    if (!frameworkStr) return 'txt';
+        const fw = frameworkStr.toLowerCase();
+    if (fw.includes('selenium') && fw.includes('java')) return 'java';
+    if (fw.includes('selenium') && fw.includes('python')) return 'py';
+    if (fw.includes('playwright')) return 'js';
+    if (fw.includes('cypress')) return 'js';
+    if (fw.includes('database') || fw.includes('sql')) return 'sql';
+    return 'txt';
+  }
+
+ async downloadProjectBundle() {
+    this.toaster.show('Preparing your download bundle...', 'success');
+    const zip = new JSZip();
+
+    try {
+      // 1. GENERATE EXCEL FILE (In-memory)
+      const dataToExport = this.testCases.map(tc => ({
+        ID: tc.ID,
+        Title: tc.Title,
+        Type: tc.Type,
+        Priority: tc.Priority,
+        Preconditions: tc.Preconditions,
+        Steps: tc.Steps,
+        Expected_Results: tc['Expected Results'] || tc.ExpectedResults
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'TestCases');
+      
+      // Write to a buffer instead of a file
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      zip.file("Functional_Test_Cases.xlsx", excelBuffer);
+
+      // 2. ADD AUTOMATION SCRIPTS
+      const scriptsFolder = zip.folder("automation_scripts");
+      
+      Object.keys(this.automationScripts).forEach(id => {
+        const scriptData = this.automationScripts[id];
+        if (scriptData && scriptData.script) {
+          // Use our mapping to find the right extension based on the 'framework' key in the response
+          const extension = this.getExtension(scriptData.framework);
+          const content = scriptData.script.join('\n');
+          scriptsFolder?.file(`${id}_Test.${extension}`, content);
+        }
+      });
+
+      // 3. GENERATE AND TRIGGER DOWNLOAD
+      const content = await zip.generateAsync({ type: "blob" });
+      const fileName = `SageScript_Project_${new Date().getTime()}.zip`;
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+
+      this.toaster.show('Bundle downloaded!', 'success');
+    } catch (error) {
+      console.error(error);
+      this.toaster.show('Failed to generate bundle', 'error');
     }
   }
-private triggerFileDownload(content: string, fileName: string, contentType: string): void {
-    const blob = new Blob([content], { type: contentType });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  }
 
-private downloadScripts(): void {
-  console.log('Downloading automation scripts:', this.automationScripts);
-    if (!this.automationScripts || Object.keys(this.automationScripts).length === 0) {
-      this.toaster.show('No automation scripts available', 'error');
-      return;
-    }
-    Object.keys(this.automationScripts).forEach(category => {
-      const scriptData = this.automationScripts[category];
-      
-      // Determine extension based on framework (default to txt if unknown)
-      const extension = this.FRAMEWORK_EXTENSIONS[scriptData.framework] || 'txt';
-      
-      // Create the file content
-      const content = scriptData.script.join('\n');
-      
-      this.triggerFileDownload(
-        content, 
-        `Sage_${category.toLowerCase()}_tests.${extension}`,
-        extension === 'sql' ? 'text/sql' : 'text/plain'
-      );
-    });
-
-    this.toaster.show('Framework-specific scripts downloaded!', 'success');
-  }
-
-  
-private exportToExcelOrCsv(type: 'csv' | 'xlsx'): void {
-    if (this.testCases.length === 0) {
-      this.toaster.show('No test cases to export', 'error');
-      return;
-    }
-
-    // 1. Flatten the data for spreadsheet format
-    const dataToExport = this.testCases.map(tc => ({
-      ID: tc.ID,
-      Title: tc.Title,
-      Type: tc.Type,
-      Priority: tc.Priority,
-      Preconditions: tc.Preconditions,
-      Steps: tc.Steps,
-      Expected_Results: tc.ExpectedResults
-    }));
-    // 2. Create worksheet
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'TestCases');
-
-    // 3. Trigger Download
-    const fileName = `SageScript_Export_${new Date().getTime()}.${type}`;
-    XLSX.writeFile(wb, fileName, { bookType: type });
-    
-    this.toaster.show(`${type.toUpperCase()} downloaded successfully!`, 'success');
-  }
-
-  // private downloadScripts(): void {
-  //   // Download automation scripts as a combined .txt or individual files
-  //   const scriptsString = Object.keys(this.automationScripts)
-  //     .map(key => `### ${key} ###\n${this.automationScripts[key].script.join('\n')}`)
-  //     .join('\n\n');
-
-  //   const blob = new Blob([scriptsString], { type: 'text/plain' });
-  //   const url = window.URL.createObjectURL(blob);
-  //   const a = document.createElement('a');
-  //   a.href = url;
-  //   a.download = 'automation_scripts.py';
-  //   a.click();
-  //   window.URL.revokeObjectURL(url);
-    
-  //   this.toaster.show('Automation scripts downloaded!', 'success');
-  // }
   pushToJira(): void {
     if (this.jiraUrl) {
       this.isJiraPushing = true;

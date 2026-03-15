@@ -18,7 +18,7 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
         <p class="text-gray-500 text-sm mt-1">Monitor test generation jobs across all projects</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div *ngFor="let card of summaryCards" class="bg-bg-secondary p-6 rounded-2xl border border-border-default flex justify-between items-center">
           <div>
             <h2 class="text-3xl font-black">{{ getCount(card.status) }}</h2>
@@ -42,11 +42,30 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
         <div class="space-y-4">
           <div *ngFor="let job of jobs" class="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl bg-bg-primary/30 border border-border-default hover:border-highlight/40 transition-all group">
             <div class="flex items-center space-x-5">
-              <div class="relative"> 
-                <svg [ngClass]="job.status === 'In Progress' ? 'animate-spin text-amber-500' : 'text-gray-500'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path *ngIf="job.status !== 'Completed'" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  <path *ngIf="job.status === 'Completed'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" class="text-green-500"/>
+             <div class="relative flex items-center justify-center w-16 h-16">
+                <svg class="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="32" cy="32" r="28"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    fill="transparent"
+                    class="text-bg-primary"
+                  />
+                  <circle
+                    cx="32" cy="32" r="28"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    fill="transparent"
+                    stroke-linecap="round"
+                    [ngClass]="job.status === 'Completed' ? 'text-green-500' : 'text-highlight'"
+                    [style.stroke-dasharray]="175.93"
+                    [style.stroke-dashoffset]="175.93 - (175.93 * (job.progress || 0) / 100)"
+                    class="transition-all duration-1000 ease-out"
+                  />
                 </svg>
+                <span class="absolute text-[11px] font-black text-text-default">
+                  {{ job.progress || 0 }}%
+                </span>
               </div>
               <div>
                 <div class="flex items-center space-x-3">
@@ -55,25 +74,25 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
                     {{ job.status }}
                   </span>
                 </div>
-                <p class="text-sm text-gray-500">{{ job.description }}</p>
+                <!-- <p class="text-sm text-gray-500">{{ job.description }}</p> -->
                 <p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">Submitted: {{ job.submitted }}</p>
               </div>
-            </div>
-            <div class="mt-4 w-full max-w-xs">
+            <!-- </div> -->
+            <!-- <div class="mt-4 w-full max-w-xs">
             <div class="flex items-center space-x-4">
-            <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden border border-border-default">
-           <div 
+            <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden border border-border-default"> -->
+           <!-- <div 
           class="h-full transition-all duration-1000 ease-out rounded-full"
           [ngClass]="job.status === 'Completed' ? 'bg-green-500' : 'bg-highlight'"
           [style.width.%]="job.progress || 0">
-          </div>
+          </div> -->
         </div>
 
-            <span class="text-[11px] font-black text-gray-500 min-w-[30px]">
+            <!-- <span class="text-[11px] font-black text-gray-500 min-w-[30px]">
              {{ job.progress || 0 }}%
             </span> 
          </div>
-        </div>
+        </div> -->
             <div class="mt-4 md:mt-0 flex items-center space-x-4">
               <div *ngIf="job.status === 'Completed'" class="text-right">
                 <p class="text-sm font-black text-text-default">{{ job.tests }} tests</p>

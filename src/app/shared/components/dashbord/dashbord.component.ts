@@ -57,7 +57,7 @@ import { DomSanitizer,SafeHtml} from '@angular/platform-browser';
                    </div>
                    <div>
                       <p class="text-sm font-bold group-hover:text-highlight transition-colors">{{ job.name }}</p>
-                      <p class="text-[10px] text-gray-500">{{ job.description }}</p>
+                     
                    </div>
                 </div>
                 <div class="flex items-center space-x-6">

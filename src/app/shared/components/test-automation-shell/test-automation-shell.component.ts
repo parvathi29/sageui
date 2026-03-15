@@ -57,13 +57,13 @@ type TestType = 'Functional' | 'Unit';
  <div *ngIf="currentView() !== 'login' && currentView() !== 'onboarding'" class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <img src="/assets/Sagescript-logo.png" alt="SageScript Logo" class="w-20 h-20">
+          <div class="flex items-center space-x-2">
+            <img src="/assets/Sagescript-logo.png" alt="SageScript Logo" class="w-30 h-10">
             <!-- <svg width="20px" height="20px" viewBox="0 0 512 512" id="icons" xmlns="http://www.w3.org/2000/svg"><path d="M259.92,262.91,216.4,149.77a9,9,0,0,0-16.8,0L156.08,262.91a9,9,0,0,1-5.17,5.17L37.77,311.6a9,9,0,0,0,0,16.8l113.14,43.52a9,9,0,0,1,5.17,5.17L199.6,490.23a9,9,0,0,0,16.8,0l43.52-113.14a9,9,0,0,1,5.17-5.17L378.23,328.4a9,9,0,0,0,0-16.8L265.09,268.08A9,9,0,0,1,259.92,262.91Z" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="108 68 88 16 68 68 16 88 68 108 88 160 108 108 160 88 108 68" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="426.67 117.33 400 48 373.33 117.33 304 144 373.33 170.67 400 240 426.67 170.67 496 144 426.67 117.33" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg> -->
-             <!-- <div class="flex flex-col leading-tight">
-            <span class="text-[20px] font-semibold" style="color:#8b7bfd;">Sage Script</span>
-            <span class="text-[10px] text-gray-400 -mt-0.5">Automated testing powered by AI</span>
-          </div> -->
+             <!-- <div class="flex flex-col leading-tight"> -->
+            <!-- <span class="text-[20px] font-semibold" style="color:#8b7bfd;">Sage Script</span> -->
+            <!-- <span class="text-[10px] text-gray-400 -mt-0.5">Automated testing powered by AI</span> -->
+          <!-- </div> -->
         </div>
         <div class="flex items-center space-x-4">
         <div *ngIf="currentUser()?.payment_status === 'no'" 
@@ -104,12 +104,12 @@ type TestType = 'Functional' | 'Unit';
     <button (click)="showUserMenu.set(!showUserMenu())" 
             class="flex items-center space-x-3 p-1.5 rounded-xl hover:bg-bg-primary transition-all border border-transparent hover:border-border-default">
       <div class="w-8 h-8 rounded-lg bg-highlight/20 flex items-center justify-center text-highlight font-bold text-xs uppercase">
-        {{ currentUser()?.displayName?.substring(0,2) }}
+        {{ currentUser()?.displayName?.substring(0,2)||'G' }}
       </div>
       <div class="flex flex-col items-start hidden sm:flex text-left">
-        <span class="text-xs font-bold text-text-default leading-none">{{ currentUser()?.displayName }}</span>
+        <span class="text-xs font-bold text-text-default leading-none">{{ currentUser()?.displayName || 'Guest' }}</span>
         <span class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">
-    {{ currentUser()?.tenants?.[0]?.role }}&#64;{{ currentUser()?.tenants?.[0]?.tenantName }}
+    {{ currentUser()?.tenants?.[0]?.role ||'guest'}}&#64;{{ currentUser()?.tenants?.[0]?.tenantName ||'.com'}}
   </span>
       </div>
       <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>

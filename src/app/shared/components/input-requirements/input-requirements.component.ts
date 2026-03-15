@@ -156,7 +156,7 @@ class="block w-full text-sm mt-2">
             </p>
           </div>
 
-          <div>
+          <!-- <div>
             <label for="testDescription" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
               Description of Test <span class="text-xs text-gray-500">(Test scope and objectives)</span>
             </label>
@@ -168,7 +168,7 @@ class="block w-full text-sm mt-2">
                class="mt-1 text-xs text-priority-high">
               Test Description is required.
             </p>
-          </div>
+          </div> -->
 
           <div>
             <label for="acceptanceCriteria" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
@@ -517,7 +517,7 @@ private updateValidation(type: InputType): void {
     const frameworkChoice = val.framework === 'other' ? 'other' : val.framework;
 
 const payload :any = {
-
+    project_id:Number(val.projectId),
     user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
     test_type:testTypeMap[val.testType],
    

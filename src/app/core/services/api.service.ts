@@ -56,11 +56,25 @@ loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
   Observable<any> { 
   const finalPayload = {
      ...payload, user_id: userId, 
-    project_id: Number(payload.projectId),
+   
     };
-    console.log('Final payload for test case generation:', finalPayload);
-     return this.http.post<any>(`${this.baseUrl}/api/generate-test-cases`, finalPayload);
-     }
+    const formData = new FormData();
+
+  // backend expects payload as STRING
+  formData.append('payload', JSON.stringify(finalPayload));
+
+  // attach file if database model exists
+  if (payload.data_model) {
+    formData.append('data_model_file', payload.data_model);
+  }
+
+  console.log("FormData payload:", finalPayload);
+
+  return this.http.post<any>(
+    `${this.baseUrl}/api/generate-test-cases`,
+    formData
+  );
+}
 
 createProject(modalData: { name: string; parentId: string; project_spec?: string | null }, userId: number):
       Observable<any> {
