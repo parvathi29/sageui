@@ -365,7 +365,7 @@ ngOnInit() {
 get activeProjectId(): string {
   const currentProjectName = this.generationData?.job_info?.project_name;
   if (!currentProjectName) return '';
-qfffffffffffffffffffffffffffffffffffffffffff
+
   // Flatten and search in your projects signal
   const match = this.flatProjectsList.find(
     p => p.name.toLowerCase() === currentProjectName.toLowerCase()
