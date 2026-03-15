@@ -517,10 +517,10 @@ private updateValidation(type: InputType): void {
     const frameworkChoice = val.framework === 'other' ? 'other' : val.framework;
 
 const payload :any = {
-    projectId:Number(val.projectId),
+
     user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
     test_type:testTypeMap[val.testType],
-    test_description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
+   
     acceptance_criteria: val.inputType === 'Manual Input' ? val.acceptanceCriteria : 'Refer to attached files.',
     framework_choice: val.framework === 'other' ? 'other' : val.framework,
     user_id: 0, 
