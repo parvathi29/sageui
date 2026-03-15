@@ -189,7 +189,7 @@ import { ToasterService } from '../../../core/services/toaster.service';
                 <button class="bg-highlight hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-highlight/20 active:scale-95 transition-all">Save Script</button>
             </div>
           </div>
-          <div class="flex-1 overflow-auto p-8 font-mono text-[11px] custom-scrollbar bg-bg-primary/10">
+          <div class="flex-1 overflow-auto p-8 font-mono text-[11px] custom-scrollbar code-box">
             <div class="flex">
                 <div class="text-right pr-6 text-gray-700 select-none border-r border-gray-800/50 mr-6">
                     <div *ngFor="let line of getActiveScript(); let i = index" class="leading-7">{{ i + 1 }}</div>

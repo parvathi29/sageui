@@ -58,8 +58,8 @@ type TestType = 'Functional' | 'Unit';
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
           <div class="flex items-center space-x-3">
-            <img src="src/assets/Sagescript-logo.png" alt="SageScript Logo" class="w-8 h-8">
-            <svg width="20px" height="20px" viewBox="0 0 512 512" id="icons" xmlns="http://www.w3.org/2000/svg"><path d="M259.92,262.91,216.4,149.77a9,9,0,0,0-16.8,0L156.08,262.91a9,9,0,0,1-5.17,5.17L37.77,311.6a9,9,0,0,0,0,16.8l113.14,43.52a9,9,0,0,1,5.17,5.17L199.6,490.23a9,9,0,0,0,16.8,0l43.52-113.14a9,9,0,0,1,5.17-5.17L378.23,328.4a9,9,0,0,0,0-16.8L265.09,268.08A9,9,0,0,1,259.92,262.91Z" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="108 68 88 16 68 68 16 88 68 108 88 160 108 108 160 88 108 68" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="426.67 117.33 400 48 373.33 117.33 304 144 373.33 170.67 400 240 426.67 170.67 496 144 426.67 117.33" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>
+            <img src="assets/Sagescript-logo.png" alt="SageScript Logo" class="w-8 h-8">
+            <!-- <svg width="20px" height="20px" viewBox="0 0 512 512" id="icons" xmlns="http://www.w3.org/2000/svg"><path d="M259.92,262.91,216.4,149.77a9,9,0,0,0-16.8,0L156.08,262.91a9,9,0,0,1-5.17,5.17L37.77,311.6a9,9,0,0,0,0,16.8l113.14,43.52a9,9,0,0,1,5.17,5.17L199.6,490.23a9,9,0,0,0,16.8,0l43.52-113.14a9,9,0,0,1,5.17-5.17L378.23,328.4a9,9,0,0,0,0-16.8L265.09,268.08A9,9,0,0,1,259.92,262.91Z" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="108 68 88 16 68 68 16 88 68 108 88 160 108 108 160 88 108 68" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><polygon points="426.67 117.33 400 48 373.33 117.33 304 144 373.33 170.67 400 240 426.67 170.67 496 144 426.67 117.33" fill="none" stroke="#8b7bfd" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg> -->
              <div class="flex flex-col leading-tight">
             <span class="text-[20px] font-semibold" style="color:#8b7bfd;">Sage Script</span>
             <span class="text-[10px] text-gray-400 -mt-0.5">Automated testing powered by AI</span>
@@ -365,7 +365,7 @@ ngOnInit() {
 get activeProjectId(): string {
   const currentProjectName = this.generationData?.job_info?.project_name;
   if (!currentProjectName) return '';
-
+qfffffffffffffffffffffffffffffffffffffffffff
   // Flatten and search in your projects signal
   const match = this.flatProjectsList.find(
     p => p.name.toLowerCase() === currentProjectName.toLowerCase()
