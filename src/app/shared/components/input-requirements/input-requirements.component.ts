@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ProjectFolder } from '../models/test-automation.model';
+import { ToasterService } from '../../../core/services/toaster.service';
 type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
 type TestType = 'functional' | 'api' | 'database';
 @Component({
@@ -269,6 +270,7 @@ showOtherFrameworkInput = false;
   showDatabaseOptions = false;
 showOtherDatabaseInput = false;
 uploadedDataModel: File | null = null;
+private toaster = inject(ToasterService);
 databaseOptions = [
 { key:'Azure SQL', value:'Azure SQL'},
 { key:'PostgreSQL', value:'PostgreSQL'},
@@ -281,7 +283,8 @@ frameworkConfig: Record<TestType, any> = {
     { key: 'Java + Selenium', value: 'Java + Selenium' },
     { key: 'JavaScript + TestComplete', value: 'JavaScript + TestComplete' },
     { key: 'Python + Selenium', value: 'Python + Selenium' },
-    { key: 'JavaScript + Playwright', value: 'JavaScript + Playwright' }
+    { key: 'JavaScript + Playwright', value: 'JavaScript + Playwright' },
+    { key: 'Other', value: 'other' }
   ],
 
   api: [
@@ -307,7 +310,6 @@ frameworkConfig: Record<TestType, any> = {
       inputType: ['Manual Input', Validators.required],
       framework: ['', Validators.required],
       userStory: ['', Validators.required],
-      testDescription: ['', Validators.required],
       acceptanceCriteria: ['', Validators.required],
       fileInput: [null as File[] | null]
     });
@@ -361,6 +363,7 @@ const control = this.inputForm.get('otherFramework');
 
 if(val === 'other'){
 control?.setValidators(Validators.required);
+ this.toaster.show('Custom frameworks will be considered in future releases.', 'success');
 }
 else{
 control?.clearValidators();
@@ -382,6 +385,7 @@ const control = this.inputForm.get('otherDatabase');
 
 if(val === 'other'){
 control?.setValidators(Validators.required);
+this.toaster.show('Custom databases will be considered in future releases.', 'success');
 }
 else{
 control?.clearValidators();
@@ -408,26 +412,26 @@ this.inputForm.get('dataModelFile')?.setValue(file);
 }
 private updateValidation(type: InputType): void {
     const userStoryControl = this.inputForm.get('userStory');
-    const testDescriptionControl = this.inputForm.get('testDescription');
+  
     const acceptanceCriteriaControl = this.inputForm.get('acceptanceCriteria');
     const fileInputControl = this.inputForm.get('fileInput');
 
     // Reset all
     userStoryControl?.clearValidators();
-    testDescriptionControl?.clearValidators();
+    // testDescriptionControl?.clearValidators();
     acceptanceCriteriaControl?.clearValidators();
     fileInputControl?.clearValidators();
 
     if (type === 'Manual Input') {
       userStoryControl?.setValidators(Validators.required);
-      testDescriptionControl?.setValidators(Validators.required);
+      // testDescriptionControl?.setValidators(Validators.required);
       acceptanceCriteriaControl?.setValidators(Validators.required);
     } else if (type === 'Upload Document') {
       fileInputControl?.setValidators(Validators.required);
     }
 
     userStoryControl?.updateValueAndValidity();
-    testDescriptionControl?.updateValueAndValidity();
+    //testDescriptionControl?.updateValueAndValidity();
     acceptanceCriteriaControl?.updateValueAndValidity();
     fileInputControl?.updateValueAndValidity();
   }
@@ -493,8 +497,6 @@ private updateValidation(type: InputType): void {
       return;
     }
 
-
-  
     const val = this.inputForm.value;
     const testTypeMap: any = {
     functional: 'automation_test',
@@ -526,7 +528,7 @@ const payload :any = {
     user_id: 0, 
     project_name: isSubProject ? (parentName || '') : (selectedProject?.name || ''),
     sub_project_name: isSubProject ? selectedProject?.name : null,
-    description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
+    // description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
    
   };
 
@@ -565,3 +567,5 @@ payload.data_model = this.uploadedDataModel;
   
 }
 }
+
+
