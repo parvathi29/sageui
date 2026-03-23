@@ -22,7 +22,8 @@ import { ApiService } from '../../../core/services/api.service';
 
 import { ToasterComponent } from "../../../toaster/toaster.component";
 import { ToasterService } from '../../../core/services/toaster.service';
-type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'new-generation' | 'scheduled-jobs';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
+type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'new-generation' | 'scheduled-jobs'|'admin';
 type TestType = 'Functional' | 'Unit'; 
 @Component({
   selector: 'app-test-automation-shell',
@@ -32,6 +33,7 @@ type TestType = 'Functional' | 'Unit';
     FormsModule,
     ProgressStepperComponent,
     DashbordComponent,
+    AdminDashboardComponent,
     InputRequirementsComponent,
     GenerationStatusComponent,
     ReviewValidateComponent,
@@ -156,6 +158,19 @@ type TestType = 'Functional' | 'Unit';
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Scheduled Jobs
               </button>
+              <ng-container *ngIf="currentUser()?.tenants?.[0]?.role?.toLowerCase() === 'admin'">
+  <div class="pt-4 mt-4 border-t border-border-default">
+    <p class="text-[10px] font-black text-gray-500 uppercase px-4 mb-2 tracking-widest">Management</p>
+    <button (click)="currentView.set('admin')" 
+            [ngClass]="{'bg-highlight/10 text-highlight': currentView() === 'admin'}"
+            class="w-full flex items-center px-4 py-3 text-gray-400 hover:text-white rounded-xl transition-all">
+      <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      Admin Console
+    </button>
+  </div>
+  </ng-container>
             </nav>
                <app-sidebar-projects
                 [projects]="projects()"
@@ -395,7 +410,15 @@ handleLogin(user: UserSession) {
   this.currentUser.set(user);
   sessionStorage.setItem('access_token', user.access_token);
   console.log('Login successful, token stored in sessionStorage:', user.access_token);
-  this.currentView.set('dashboard');
+  const userRole = user.tenants?.[0]?.role?.toLowerCase();
+  // 2. Conditional Redirection
+  if (userRole === 'admin') {
+    this.currentView.set('admin');
+    console.log('Admin detected. Redirecting to Admin Console...');
+  } else {
+    this.currentView.set('dashboard');
+    this.loadUserProjects();
+  }
   
   // Use the primary tenant's name or ID to load projects
   // In an enterprise app, you might let the user select a tenant first
@@ -404,11 +427,7 @@ handleLogin(user: UserSession) {
   // this.loadTenantProjects(user.displayName, primaryTenant.tenantId);
 }
 
-// loadTenantProjects(userName: string, tenantId: number) {
-//   // Update your API call to pass the tenant context if necessary
-//   this.http.get<ProjectFolder[]>(`http://127.0.0.1:8000/api/projects/${userName}`)
-//     .subscribe(data => this.projects.set(data));
-// }
+
 
   
 
