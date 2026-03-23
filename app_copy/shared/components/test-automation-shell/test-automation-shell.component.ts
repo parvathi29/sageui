@@ -145,7 +145,6 @@ type TestType = 'Functional' | 'Unit';
           <div class="p-6 space-y-8 flex-1">
             
             <nav class="space-y-1">
-
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Portfolio</p>
               <button (click)="currentView.set('dashboard')" [ngClass]="{'bg-highlight/10 text-highlight': currentView() === 'dashboard'}" class="w-full flex items-center p-3 rounded-xl hover:bg-bg-primary text-gray-400 transition-all font-medium">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -159,8 +158,6 @@ type TestType = 'Functional' | 'Unit';
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Scheduled Jobs
               </button>
-
-
               <ng-container *ngIf="currentUser()?.tenants?.[0]?.role?.toLowerCase() === 'admin'">
   <div class="pt-4 mt-4 border-t border-border-default">
     <p class="text-[10px] font-black text-gray-500 uppercase px-4 mb-2 tracking-widest">Management</p>
@@ -173,7 +170,7 @@ type TestType = 'Functional' | 'Unit';
       Admin Console
     </button>
   </div>
-</ng-container>
+  </ng-container>
             </nav>
                <app-sidebar-projects
                 [projects]="projects()"
@@ -202,7 +199,6 @@ type TestType = 'Functional' | 'Unit';
     </ng-container>
 
     <app-scheduled-jobs *ngIf="currentView() === 'scheduled-jobs'" (onReview)="handleJobReview($event)"></app-scheduled-jobs>
-    <app-admin-dashboard *ngIf="currentView() === 'admin'"></app-admin-dashboard>
 
    
          <div *ngIf="currentView() === 'new-generation'" class="max-w-6xl mx-auto">
@@ -414,7 +410,6 @@ handleLogin(user: UserSession) {
   this.currentUser.set(user);
   sessionStorage.setItem('access_token', user.access_token);
   console.log('Login successful, token stored in sessionStorage:', user.access_token);
-  // this.currentView.set('dashboard');
   const userRole = user.tenants?.[0]?.role?.toLowerCase();
   // 2. Conditional Redirection
   if (userRole === 'admin') {
@@ -424,6 +419,7 @@ handleLogin(user: UserSession) {
     this.currentView.set('dashboard');
     this.loadUserProjects();
   }
+  
   // Use the primary tenant's name or ID to load projects
   // In an enterprise app, you might let the user select a tenant first
   const primaryTenant = user.tenants[0]; 
@@ -431,11 +427,7 @@ handleLogin(user: UserSession) {
   // this.loadTenantProjects(user.displayName, primaryTenant.tenantId);
 }
 
-// loadTenantProjects(userName: string, tenantId: number) {
-//   // Update your API call to pass the tenant context if necessary
-//   this.http.get<ProjectFolder[]>(`http://127.0.0.1:8000/api/projects/${userName}`)
-//     .subscribe(data => this.projects.set(data));
-// }
+
 
   
 

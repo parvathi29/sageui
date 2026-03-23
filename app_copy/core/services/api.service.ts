@@ -101,7 +101,6 @@ createProject(modalData: { name: string; parentId: string; project_spec?: string
     sendDetailedFeedback(payload: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/feedback/detailed`, payload);
   }
-
  getAdminOnboarding(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/api/admin/onboarding`);
   }
@@ -113,4 +112,5 @@ createProject(modalData: { name: string; parentId: string; project_spec?: string
   approveOnboarding(requestId: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/admin/onboarding/approve/${requestId}`, {});
   }
+
 }
