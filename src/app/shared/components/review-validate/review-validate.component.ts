@@ -25,6 +25,8 @@ import { ToasterService } from '../../../core/services/toaster.service';
           </div>
           <h2 class="text-3xl font-black text-text-default">{{ jobInfo?.project_name || 'Banking Portal' }}</h2>
           <p class="text-gray-500 text-xs mt-1">Job ID: {{ jobInfo?.job_id || 'JOB-C100' }} • Completed: {{ jobInfo?.submitted_at || 'Jan 02, 2026' }}</p>
+           <p class="text-gray-500 text-xs mt-1"> Story: {{ jobInfo?.story_id || 'N/A' }}</p>
+         
         </div>
         <div class="flex space-x-3">
            <button (click)="addNewTestCase.emit()" class="bg-highlight text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition-all shadow-lg shadow-highlight/20 flex items-center">
@@ -231,7 +233,9 @@ export class ReviewValidateComponent implements OnInit,OnChanges {
   @Output() addNewTestCase = new EventEmitter<void>();
   @Input() projectId!: string;
   @Input() userId!: number;
- 
+  @Input() storyData: any;
+  @Input() storyId!: string;
+  @Input() jobId!: string;
   // State
   thumbUpSvg: SafeHtml = '';
   thumbDownSvg: SafeHtml = '';
@@ -242,12 +246,12 @@ export class ReviewValidateComponent implements OnInit,OnChanges {
   scriptKeys: string[] = [];
   alertMessage: string | null = null;
   alertType: 'success' | 'info' | 'error' = 'success';
+  isLoading: boolean =true;
 
 showAlert(message: string, type: 'success' | 'info' | 'error' = 'success') {
   this.alertMessage = message;
   this.alertType = type;
 }
-  
   // Filtering & Pagination
   searchTerm = '';
   filterPriority = 'All';
@@ -257,12 +261,26 @@ showAlert(message: string, type: 'success' | 'info' | 'error' = 'success') {
   constructor(private apiservice: ApiService, private sanitizer: DomSanitizer,private http: HttpClient) {}
 
   ngOnInit() {
+    console.log('RE-INIT: Review Component is alive!');
     this.loadIcons();
      console.log('ReviewValidateComponent initialized with projectId:', this.projectId, 'and userId:', this.userId);
+    if (this.jobId && this.storyId) {
+      console.log('Loading results for storyId:', this.storyId, 'and jobId:', this.jobId);
+    this.loadResults();
+
+  }
     // this.scriptKeys = Object.keys(this.automation_scripts);
     // if (this.scriptKeys.length > 0) this.selectedScriptKey = this.scriptKeys[0];
   }
 ngOnChanges(changes: SimpleChanges) {
+  console.log('5. Review Component Changes detected:', changes);
+  if ((changes['storyId'] || changes['jobId']) && this.storyId && this.jobId) {
+    console.log('6. New IDs detected in Review:', {
+      storyId: this.storyId,
+      jobId: this.jobId
+    });
+      this.loadResults();
+    }
     if (changes['automation_scripts'] && this.automation_scripts) {
       this.scriptKeys = Object.keys(this.automation_scripts);
       
@@ -272,8 +290,39 @@ ngOnChanges(changes: SimpleChanges) {
       }
     }
   }
+  loadResults() {
+    this.isLoading = true;
+    // Calling the API endpoint you shared: /api/results/{job_id}?story_id={story_id}
+    this.apiservice.getJobResults(this.jobId, this.storyId).subscribe({
+      next: (res: any) => {
+        this.testCases = res.test_cases || [];
+        this.automation_scripts = this.formatScripts(res.automation_scripts);
+        this.jobInfo = res.job_info;
+        
+        // Update script keys for the registry sidebar
+        this.scriptKeys = Object.keys(this.automation_scripts);
+        if (this.scriptKeys.length > 0) {
+          this.selectedScriptKey = this.scriptKeys[0];
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.toaster.show("Failed to load results for this story", "error");
+        this.isLoading = false;
+      }
+    });
+  }
   // Logic Helpers
-
+private formatScripts(scriptsArr: any[]): any {
+    const scriptObj: any = {};
+    scriptsArr.forEach(s => {
+      scriptObj[s.user_story_id || 'Script'] = {
+        framework: s.framework || 'Selenium',
+        script: Array.isArray(s.script_content) ? s.script_content : (s.script_content || '').split('\n')
+      };
+    });
+    return scriptObj;
+  }
   trackByKey(index: number, key: string) {
   return key; 
 }

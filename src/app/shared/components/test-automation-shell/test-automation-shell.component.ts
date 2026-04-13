@@ -1,5 +1,5 @@
 //app-test-automation-shell component
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, signal, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProgressStepperComponent } from '../progress-stepper/progress-stepper.component';
 import { InputRequirementsComponent } from '../input-requirements/input-requirements.component';
@@ -23,7 +23,8 @@ import { ApiService } from '../../../core/services/api.service';
 import { ToasterComponent } from "../../../toaster/toaster.component";
 import { ToasterService } from '../../../core/services/toaster.service';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
-type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'new-generation' | 'scheduled-jobs'|'admin';
+import { ProjectViewComponent } from '../project-view/project-view.component';
+type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'project-view'|'new-generation' | 'scheduled-jobs'|'admin'|'project-view'|'review'|'export';
 type TestType = 'Functional' | 'Unit'; 
 @Component({
   selector: 'app-test-automation-shell',
@@ -38,6 +39,7 @@ type TestType = 'Functional' | 'Unit';
     GenerationStatusComponent,
     ReviewValidateComponent,
     FormsModule,
+    ProjectViewComponent,
     ExportDeployComponent,
     LandingPageComponent,
     UnitTestInputComponent,
@@ -175,32 +177,39 @@ type TestType = 'Functional' | 'Unit';
   </div>
 </ng-container>
             </nav>
-               <app-sidebar-projects
-                [projects]="projects()"
-                (toggle)="toggleProject($event)"
-                (onCreateRequest)="showprojmodel.set(true)">
-</app-sidebar-projects>
+              <app-sidebar-projects
+  [projects]="projects()"
+  (toggle)="toggleProject($event)"
+  (onSelect)="onSidebarProjectClick($event)"
+  (onCreateRequest)="showprojmodel.set(true)"
+/>
 <app-project-model
   *ngIf="showprojmodel()"
   [flatProjects]="flatProjectsList"
   (onClose)="showprojmodel.set(false)"
-  (onCreate)="handleCreateProject($event)">
-</app-project-model>
-
-
+  (onCreate)="handleCreateProject($event)"
+/>
           </div>
         </aside>
 
-      <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+      <main class="flex-1 overflow-y-auto p-4 custom-scrollbar">
     <app-toaster></app-toaster>
     <app-landing-page *ngIf="currentView() === 'landing'" (getStarted)="onGetStarted()"
 (tryDemo)="currentView.set('onboarding')">
 </app-landing-page>
 
     <ng-container *ngIf="currentView() === 'dashboard'">
-      <app-dashbord (onNewGeneration)="currentView.set('new-generation')" (onViewJobs)="currentView.set('scheduled-jobs')"></app-dashbord>
+      <app-dashbord (onNewGeneration)="currentView.set('new-generation')"
+       (onViewJobs)="currentView.set('scheduled-jobs')"
+      (onProjectSelect)="viewProject($event.toString())">
+    </app-dashbord>
     </ng-container>
-
+     
+    <app-project-view *ngIf="currentView() === 'project-view'"
+      [projectId]="selectedProjectId ? +selectedProjectId : 0" 
+      (navigateToStories)="viewStories($event)">
+    </app-project-view>
+  
     <app-scheduled-jobs *ngIf="currentView() === 'scheduled-jobs'" (onReview)="handleJobReview($event)"></app-scheduled-jobs>
     <app-admin-dashboard *ngIf="currentView() === 'admin'"></app-admin-dashboard>
 
@@ -231,12 +240,12 @@ type TestType = 'Functional' | 'Unit';
           <ng-container *ngIf="currentTestType === 'Functional'"> 
              <app-progress-stepper [currentStep]="currentStep"></app-progress-stepper>
       <div class="mt-10">
-        <app-input-requirements
-          *ngIf="currentStep === 1"
-          [projects]="flatProjectsList"
-          (generationSuccess)="handleGeneration($event)"
-          (onCreateNewProject)="showprojmodel.set(true)">
-        ></app-input-requirements>
+ <app-input-requirements
+  *ngIf="currentStep === 1"
+  [projects]="flatProjectsList"
+  (generationSuccess)="handleGeneration($event)"
+  (onCreateNewProject)="showprojmodel.set(true)">
+</app-input-requirements>
 
         <ng-container *ngIf="currentStep === 2">
         <div *ngIf="!generationData; else statusContent" class="p-8 text-center bg-bg-secondary rounded-xl shadow-2xl">
@@ -259,7 +268,7 @@ type TestType = 'Functional' | 'Unit';
             ></app-generation-status>
           </ng-template>
         </ng-container>
-        <app-review-validate
+        <!-- <app-review-validate
           *ngIf="currentStep === 3"
           [testCases]="generationData?.test_cases || []"
           [automation_scripts]="generationData?.automation_scripts || {}"
@@ -270,10 +279,10 @@ type TestType = 'Functional' | 'Unit';
           (exportAndDeploy)="currentStep = 4"
           (goBack)= "currentView.set('scheduled-jobs')"
           (addNewTestCase)="addNewTestCase()"
-        ></app-review-validate>
+        ></app-review-validate> -->
 
 
-    <app-export-deploy
+    <!-- <app-export-deploy
           *ngIf="currentStep === 4"
           [totalTestCases]="generationData?.test_cases?.length || 0"
           [totalAutomationScripts]="scriptCount"
@@ -281,13 +290,33 @@ type TestType = 'Functional' | 'Unit';
           [automationScripts]="generationData?.automation_scripts || {}"
           (goBack)="currentStep = 3"
           (startNew)="resetFlow()"
-        ></app-export-deploy>
+        ></app-export-deploy> -->
     
     </div>
     </ng-container>
+    </div>
+    @if (currentView() === 'review') {
+    <app-review-validate
+      [storyId]="activeStoryData?.storyId"
+      [jobId]="activeStoryData?.jobId"
+      [projectId]="activeProjectId!"
+      [userId]="currentUser()?.userId!"
+      (exportAndDeploy)="currentView.set('export')"
+      (goBack)="currentView.set('project-view')"
+    ></app-review-validate>
+  }
+  @if (currentView() === 'export') {
+    <app-export-deploy
+      [storyId]="activeStoryData?.storyId"
+      [totalTestCases]="generationData?.test_cases?.length || 0"
+    [totalAutomationScripts]="scriptCount"
+      [jobId]="activeStoryData?.jobId"
+      (goBack)="currentView.set('review')"
+      (startNew)="resetFlow()"
+    ></app-export-deploy>
+  }
 
  <app-unit-test-input *ngIf="currentTestType === 'Unit'" (generationComplete)="currentStep = 1"></app-unit-test-input>
-    </div>
     </main>
     </div>
 
@@ -316,10 +345,11 @@ type TestType = 'Functional' | 'Unit';
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
   `]
 })
-export class TestAutomationShellComponent  {
+export class TestAutomationShellComponent {
   private toaster = inject(ToasterService);
   theme=inject(ThemeService);
   http = inject(HttpClient);
+  activeStoryData: any = null;
   currentView = signal<AppView>('landing');
   currentStep: number = 1;
   receivedData: any = null; 
@@ -328,7 +358,10 @@ export class TestAutomationShellComponent  {
   showprojmodel=signal(false);
   showUserMenu = signal(false);
   isLocked=signal(false);
+  lastReviewedJobId: string | null = null;
 projectId: string | null = null;
+selectedProjectId: string | null = null;
+activeJobData: any = null;
 projects = signal<ProjectFolder[]>([
   { id: '1', name: 'E-Commerce Platform', count: 45, subFolders: [] },
   { id: '2', name: 'Banking Portal', count: 67, subFolders: [] },
@@ -337,6 +370,7 @@ projects = signal<ProjectFolder[]>([
   ]}
 ]);
 currentUser = signal<UserSession | null>(null);
+  projectData: any = null;
 
 constructor(private apiService: ApiService) {}
 
@@ -374,6 +408,25 @@ ngOnInit() {
     });
   }
 
+
+  loadProjectDetails() {
+    // Show a small loader if needed
+    const projectIdNumeric = this.projectId ? Number(this.projectId) : null;
+    if (!projectIdNumeric) {
+      return;
+    }
+    this.apiService.getProjectDetails(projectIdNumeric).subscribe(data => {
+      this.projectData = data;
+      console.log
+      this.updateStatCards(data);
+    });
+  }
+
+  updateStatCards(data: any): void {
+    // Placeholder for future KPI/stat update logic.
+    // Keep this method so the component compiles and can later populate UI cards.
+    console.log('Project stats updated', data);
+  }
   handleLockdown() {
     this.isLocked.set(true);
     // Clear credentials but keep the "Locked" view visible
@@ -383,14 +436,24 @@ ngOnInit() {
   }
 get activeProjectId(): string {
   const currentProjectName = this.generationData?.job_info?.project_name;
+  
+  // 1. If we don't have a project name yet, stop here.
   if (!currentProjectName) return '';
 
-  // Flatten and search in your projects signal
-  const match = this.flatProjectsList.find(
-    p => p.name.toLowerCase() === currentProjectName.toLowerCase()
+  // 2. Add a check inside the find to ensure p.name exists before calling toLowerCase
+  const match = this.flatProjectsList.find(p => 
+    p?.name && p.name.toLowerCase() === currentProjectName.toLowerCase()
   );
   
   return match ? match.id.toString() : '';
+}
+onSidebarProjectClick(id: string) {
+  this.selectedProjectId = id;
+  this.currentView.set('project-view');
+}
+viewStories(job: any) {
+  this.activeJobData = job;
+  this.currentView.set('review');
 }
 private updateNestedProjects(list: ProjectFolder[], parentId: string, newItem: ProjectFolder) {
   for (let folder of list) {
@@ -409,7 +472,10 @@ private updateNestedProjects(list: ProjectFolder[], parentId: string, newItem: P
     this.currentView.set('login');
     this.currentStep = 1;
   }
-
+onStorySelectedForReview(eventData: any) {
+  this.activeStoryData = eventData; // Contains { storyId, jobId }
+  this.currentView.set('review');   // Switch to the review component
+}
 handleLogin(user: UserSession) {
   this.currentUser.set(user);
   sessionStorage.setItem('access_token', user.access_token);
@@ -431,11 +497,7 @@ handleLogin(user: UserSession) {
   // this.loadTenantProjects(user.displayName, primaryTenant.tenantId);
 }
 
-// loadTenantProjects(userName: string, tenantId: number) {
-//   // Update your API call to pass the tenant context if necessary
-//   this.http.get<ProjectFolder[]>(`http://127.0.0.1:8000/api/projects/${userName}`)
-//     .subscribe(data => this.projects.set(data));
-// }
+
 
   
 
@@ -583,6 +645,7 @@ get flatProjectsList(): ProjectFolder[] {
     this.currentView.set('dashboard');
     this.currentStep = 1;
     this.generationData = null;
+    this.activeStoryData = null;
     this.currentTestType = 'Functional';
     console.log('Flow reset. Ready for new input.');
   }
@@ -638,26 +701,33 @@ private toggleRecursive(list: ProjectFolder[], id: string): ProjectFolder[] {
     return folder;
   });
 }
-handleJobReview(job: any): void {
-  console.log('Orchestrating review for Job ID:', job.id);
-  
-  this.apiService.getJobResults(job.id).subscribe({
+viewProject(projectId: string): void {
+  this.selectedProjectId = projectId;
+  this.currentView.set('project-view');
+}
+
+handleJobReview(payload: { jobId: string; storyId: string; storyText?: string }): void {
+  // 1. SET THE ACTIVE STORY DATA (Crucial for the @if review block)
+  console.log('1. Shell received payload:', payload);
+  this.activeStoryData = {
+    storyId: payload.storyId,
+    jobId: payload.jobId
+  };
+console.log('2. activeStoryData set to:', this.activeStoryData);
+  // 2. Fetch the data
+  this.apiService.getJobResults(payload.jobId, payload.storyId).subscribe({
     next: (data: GenerationResult) => {
-    
-      this.generationData = data
-      this.currentView.set('new-generation');
-
-      this.currentStep = 3; 
-
-      console.log('Navigation to Review page complete for project:', data.job_info?.project_name);
+      this.generationData = data;
+      // 3. Switch the view
+      this.currentView.set('review');
+      console.log('4. View switched to review. CurrentView signal:', this.currentView());
+      // this.currentStep = 3; 
     },
     error: (err) => {
-      console.error('Failed to load job results:', err);
-      alert('Error: Could not retrieve test results for this job.');
+      this.toaster.show('Could not retrieve results', 'error');
     }
   });
 }
-
 
 logout(): void {
   // 1. Clear session data

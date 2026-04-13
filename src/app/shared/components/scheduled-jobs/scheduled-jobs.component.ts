@@ -5,25 +5,35 @@ import { HttpClient } from '@angular/common/http';
 import { interval, Subscription, switchMap, tap } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ToasterService } from '../../../core/services/toaster.service'; // Ensure this path is correct
-
+import { ToasterService } from '../../../core/services/toaster.service';
+import { AgentStatusModalComponent } from "../agent-status-modal/agent-status-modal.component"; // Ensure this path is correct
+type ViewMode = 'jobs' | 'stories';
 @Component({
   selector: 'app-scheduled-jobs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AgentStatusModalComponent],
   template: `
     <div class="animate-fade-in space-y-8">
       <div>
-        <h1 class="text-3xl font-extrabold tracking-tight">Scheduled Jobs</h1>
-        <p class="text-gray-500 text-sm mt-1">Monitor test generation jobs across all projects</p>
+        <h1 class="text-3xl font-extrabold tracking-tight">
+            {{ viewMode === 'jobs' ? 'Scheduled Jobs' : 'User Stories' }}
+          </h1>
+       <p class="text-gray-500 text-sm mt-1">
+            {{ viewMode === 'jobs' ? 'Monitor test generation jobs across all projects' : 'Select a story from ' + selectedJob?.project }}
+          </p>
+    
+        <button *ngIf="viewMode === 'stories'" (click)="viewMode = 'jobs'" 
+                class="flex items-center space-x-2 px-4 py-2 bg-bg-secondary border border-border-default rounded-xl hover:text-highlight transition-all font-bold text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Back to Jobs</span>
+        </button>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div  *ngIf="viewMode === 'jobs'" class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div *ngFor="let card of summaryCards" class="bg-bg-secondary p-6 rounded-2xl border border-border-default flex justify-between items-center">
           <div>
             <h2 class="text-3xl font-black">{{ getCount(card.status) }}</h2>
             <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">{{ card.label }}</p>
-          </div>
+</div >
           <div class="p-3 bg-bg-primary rounded-full text-highlight">
            <svg [ngClass]="{'animate-spin': card.status === 'In Progress'}" 
             class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
@@ -34,6 +44,7 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
       </div>
 
       <div class="bg-bg-secondary rounded-3xl border border-border-default p-8 shadow-sm">
+          <ng-container *ngIf="viewMode === 'jobs'">
         <div class="flex items-center space-x-4 mb-8 bg-bg-primary/50 p-3 rounded-xl border border-border-default">
            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
            <input type="text" placeholder="Search by project name or description..." class="bg-transparent border-none outline-none text-sm w-full">
@@ -68,37 +79,60 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
                 </span>
               </div>
               <div>
-                <div class="flex items-center space-x-3">
-                  <h3 class="font-bold text-lg group-hover:text-highlight transition-colors">{{ job.project }}</h3>
-                  <span [ngClass]="getStatusClasses(job.status)" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter border">
-                    {{ job.status }}
-                  </span>
-                </div>
+
+              <div class="flex items-center space-x-3">
+  <h3 class="font-bold text-lg group-hover:text-highlight transition-colors">
+    {{ job.project }}
+  </h3>
+
+  <span [ngClass]="getStatusClasses(job.status)" 
+        class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter border">
+    {{ job.status }}
+  </span>
+
+  <!-- ✅ Agent Status Button -->
+  <button (click)="openAgentTrace(job.id)" 
+          class="flex items-center space-x-2 px-3 py-1.5 bg-bg-secondary border border-border-default rounded-xl hover:border-highlight transition-all group">
+    
+    <svg class="w-4 h-4 text-gray-500 group-hover:text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+    </svg>
+
+    <span class="text-[10px] font-bold text-gray-400 group-hover:text-text-default">
+      Agent Status
+    </span>
+  </button>
+</div>
+<div class="flex items-center space-x-2 mt-1">
+    <span class="text-[10px] bg-bg-secondary px-2 py-0.5 rounded border border-border-default text-gray-400 font-mono">
+      ID: {{ job.id }}
+    </span>
+  
+  </div>
+
                 <!-- <p class="text-sm text-gray-500">{{ job.description }}</p> -->
                 <p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">Submitted: {{ job.submitted }}</p>
               </div>
-            <!-- </div> -->
-            <!-- <div class="mt-4 w-full max-w-xs">
-            <div class="flex items-center space-x-4">
-            <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden border border-border-default"> -->
-           <!-- <div 
-          class="h-full transition-all duration-1000 ease-out rounded-full"
-          [ngClass]="job.status === 'Completed' ? 'bg-green-500' : 'bg-highlight'"
-          [style.width.%]="job.progress || 0">
-          </div> -->
-        </div>
+            </div>
+
+        
 
             <!-- <span class="text-[11px] font-black text-gray-500 min-w-[30px]">
              {{ job.progress || 0 }}%
             </span> 
          </div>
         </div> -->
+
+
+
+
             <div class="mt-4 md:mt-0 flex items-center space-x-4">
               <div *ngIf="job.status === 'Completed'" class="text-right">
-                <p class="text-sm font-black text-text-default">{{ job.tests }} tests</p>
+                <p class="text-sm font-black text-text-default">{{ job.user_story_count }} Tests</p>
                 <p class="text-[10px] text-gray-500 uppercase font-bold">Generated</p>
               </div> 
-              <button *ngIf="job.status === 'Completed'" (click)="onReview.emit(job)" 
+              <!-- <button *ngIf="job.status === 'Completed'" (click)="onReview.emit(job)"  -->
+              <button *ngIf="job.status === 'Completed'" (click)="handleReviewClick(job)" 
                       class="bg-highlight hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-highlight/20 active:scale-95">
                 Review & Edit
               </button>
@@ -118,11 +152,45 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
                   </button>
                 </div>
               </div>
+                </div>
+              
             </div>
           </div>
+          </ng-container>
+      
+ <ng-container *ngIf="viewMode === 'stories'">
+          <div class="grid grid-cols-1 gap-4 animate-fade-in">
+ <div *ngFor="let story of availableStories" 
+                 (click)="selectStoryAndReview(story, selectedJobForStories.id)"
+                 class="p-6 bg-bg-primary/20 border border-border-default rounded-2xl hover:border-highlight cursor-pointer transition-all group relative overflow-hidden">
+              
+              <div class="absolute inset-0 bg-highlight/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              <div class="relative z-10">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="px-3 py-1 bg-highlight/10 text-highlight text-[10px] font-black rounded-lg uppercase tracking-widest border border-highlight/20">
+                    {{ story.user_story_id }}
+                  </span>
+                  <div class="flex items-center text-xs font-bold text-gray-500 group-hover:text-highlight transition-colors">
+                    <span>Review Test Cases</span>
+                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                  </div>
+                   </div>
+                <p class="text-text-default font-medium leading-relaxed group-hover:text-white transition-colors">
+                  {{ story.user_story_text }}
+                </p>
+                </div>
+                </div>
+          </div>
+        </ng-container>
         </div>
-            </div>
 
+<app-agent-status-modal 
+  *ngIf="activeTraceJobId"
+  [jobId]="activeTraceJobId"
+  [traceData]="activeTraceData"
+  (onClose)="activeTraceJobId = null">
+</app-agent-status-modal>
        <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in">
         <div class="bg-bg-secondary border border-border-default p-8 rounded-3xl max-w-sm w-full shadow-2xl">
           <h3 class="text-xl font-bold mb-2">Confirm Deletion</h3>
@@ -133,6 +201,7 @@ import { ToasterService } from '../../../core/services/toaster.service'; // Ensu
           </div>
         </div>
       </div>
+   
     </div>
     `,
   styles: [`
@@ -150,12 +219,16 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
 
   private pollSub?: Subscription;
   private notifiedJobIds = new Set<string>(); // 2. Tracking Set to avoid spamming toasters
-
+activeTraceJobId: string | null = null;
+activeTraceData: any = {};
+viewMode: ViewMode = 'jobs';
+  selectedJobForStories: any = null;
+    availableStories: any[] = [];
   jobs: any[] = [];
   activeMenuId: string | null = null;
   showDeleteModal = false;
   jobToDelete: any = null;
-
+selectedJob: any = null;
   summaryCards = [
     { 
       label: 'In Queue', 
@@ -190,12 +263,24 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
       switchMap(() => this.http.get<any[]>(this.apiService.jobsurl)),
       tap(data => this.processJobStatusNotifications(data))
     ).subscribe(data => this.jobs = data);
+
+    if (this.selectedJobForStories) {
+    this.viewMode = 'stories';
+  }
   }
 
   ngOnDestroy() { 
     this.pollSub?.unsubscribe(); 
   }
-
+  loadJobs(isInitial = false) {
+    this.http.get<any[]>(this.apiService.jobsurl).subscribe(data => {
+      this.jobs = data;
+      if (isInitial) {
+        data.filter(j => j.status === 'Completed')
+            .forEach(j => this.notifiedJobIds.add(j.id));
+      }
+    });
+  }
   // 5. Logic to trigger toaster only on fresh completions
   private processJobStatusNotifications(newJobs: any[]) {
     newJobs.forEach(job => {
@@ -205,16 +290,42 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  loadJobs(isInitial: boolean = false) {
-    this.http.get<any[]>(this.apiService.jobsurl).subscribe(data => {
-      this.jobs = data;
-      if (isInitial) {
-        // Mark existing completed jobs as already notified
-        data.filter(j => j.status === 'Completed').forEach(j => this.notifiedJobIds.add(j.id));
-      }
+handleReviewClick(job: any) {
+  this.selectedJob = job; // Set for the "Select a story from..." header
+  this.selectedJobForStories = job;
+  this.apiService.getStories(job.id).subscribe((stories: any[]) => {
+    this.availableStories = stories;
+    this.viewMode = 'stories'; // Switch view AFTER stories are loaded
+  });
+}
+   // ✅ SELECT STORY
+  selectStoryAndReview(story: any,jobId: string) {
+console .log('emitted from jobs ',story, jobId);
+    this.onReview.emit({
+      storyId: story.user_story_id,
+      storyText: story.user_story_text,
+        jobId: story.job_id
     });
   }
+openAgentTrace(jobId: string) {
+  this.apiService.getAgentTrace(jobId).subscribe(data => {
+    this.activeTraceData = data;
+    this.activeTraceJobId = jobId;
+  });
+}
+onCloseTrace() {
+  this.activeTraceJobId = null;
+  this.activeTraceData = null;
+}
+  // loadJobs(isInitial: boolean = false) {
+  //   this.http.get<any[]>(this.apiService.jobsurl).subscribe(data => {
+  //     this.jobs = data;
+  //     if (isInitial) {
+  //       // Mark existing completed jobs as already notified
+  //       data.filter(j => j.status === 'Completed').forEach(j => this.notifiedJobIds.add(j.id));
+  //     }
+  //   });
+  // }
   
   toggleMenu(id: string, event: Event) {
     event.stopPropagation();
@@ -245,9 +356,7 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
     }); 
   }
 
-  getCount(status: string) { 
-    return this.jobs.filter(j => j.status === status).length;
-  }
+ 
 
   getStatusClasses(status: string) {
     switch (status) {
@@ -256,4 +365,5 @@ export class ScheduledJobsComponent implements OnInit, OnDestroy {
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
   }
+  getCount(status: string) { return this.jobs.filter(j => j.status === status).length; }
 }

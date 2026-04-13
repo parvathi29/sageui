@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-
+:host {
+  display: block;
+  width: 100%;
+}
+main {
+  width: 100%;
+  // overflow-x: hidden;
+  position: relative; // Keeps absolute blurs relative to the main container
+}
 body {
   // @apply bg-primary-dark text-text-light min-h-screen;
   background-color: var(--color-bg-primary);
@@ -16,8 +24,8 @@ body {
   @apply container mx-auto p-4 sm:p-8;
 }
 :root {
-  --color-bg-primary: #ffffff ; /* White background */
-  --color-bg-secondary: #f0f0f087;/* Light gray cards/panels */
+  --color-bg-primary:#f0f0f087 ; /* White background */
+  --color-bg-secondary:  #ffffff;/* Light gray cards/panels */
   --color-text-default: #374151; 
   --color-border-default: #2376f3;
   --color-text-content: #6a6868;  /* Light gray borders */

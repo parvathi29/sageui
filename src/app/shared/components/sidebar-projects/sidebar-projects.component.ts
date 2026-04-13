@@ -25,7 +25,7 @@ import { ProjectFolder } from '../models/test-automation.model';
           <div 
             class="group flex items-center justify-between p-2 rounded-xl text-gray-400 hover:bg-bg-primary cursor-pointer transition-all border border-transparent hover:border-border-default"
             [style.padding-left.px]="level * 12 + 8"
-            (click)="toggleFolder(folder)"
+            (click)="handleProjectClick($event, folder)"
           >
             <div class="flex items-center min-w-0">
               <svg *ngIf="folder.subFolders?.length" 
@@ -54,8 +54,18 @@ export class SidebarProjectsComponent {
   @Input() projects: ProjectFolder[] = [];
   @Output() onCreateRequest = new EventEmitter<void>();
   @Output() toggle = new EventEmitter<string>();
-
+@Output() onSelect = new EventEmitter<string>();
 toggleFolder(folder: ProjectFolder) {
   this.toggle.emit(folder.id);
+}
+handleProjectClick(event: MouseEvent, folder: ProjectFolder) {
+    event.stopPropagation();
+    // 1. Emit select to show the ProjectViewComponent
+    this.onSelect.emit(folder.id);
+    
+    // 2. Still toggle if it has children (optional, based on your preference)
+    if (folder.subFolders?.length) {
+      this.toggle.emit(folder.id);
+    }
 }
 }

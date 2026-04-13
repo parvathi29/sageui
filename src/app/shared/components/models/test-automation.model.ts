@@ -43,6 +43,7 @@ export interface JobInfo {
   project_id: string;
   submitted_by: string;
   completed_at: string;
+  story_id?: string;
 }
 export interface Tenant {
   tenantId: number;

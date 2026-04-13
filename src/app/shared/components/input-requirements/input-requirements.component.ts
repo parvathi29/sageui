@@ -1,10 +1,11 @@
 import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ProjectFolder } from '../models/test-automation.model';
 import { ToasterService } from '../../../core/services/toaster.service';
+import { ApiService } from '../../../core/services/api.service';
 type InputType = 'Manual Input' | 'Upload Document' | 'Fetch from DevOps' ;
 type TestType = 'functional' | 'api' | 'database';
 @Component({
@@ -42,7 +43,7 @@ type TestType = 'functional' | 'api' | 'database';
               Test Type
               </label>
 
-            <select formControlName="testType"
+        <select formControlName="testType"
          class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default focus:ring-highlight focus:border-highlight outline-none"
           >
         <option value="functional">Functional Test Case</option>
@@ -62,15 +63,16 @@ type TestType = 'functional' | 'api' | 'database';
             </select>
         </div>
 
+
         <div *ngIf="!showDatabaseOptions" class="flex flex-col space-y-2 pt-2">
          <label class="text-sm font-medium text-gray-500">
-Framework
-</label>
-<select formControlName="framework" class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
+         Framework
+          </label>
+        <select formControlName="framework" class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 text-text-default">
 
-<option *ngFor="let fw of frameworkOptions" [value]="fw.value">
-{{fw.key}}
-</option>
+         <option *ngFor="let fw of frameworkOptions" [value]="fw.value">
+         {{fw.key}}
+         </option>
 
 </select>
 </div>
@@ -142,51 +144,53 @@ class="block w-full text-sm mt-2">
                    </p>
                    </div>
                   </div>
+                                 <div class="flex flex-col leading-tight"> 
+               <h4 class="text-sm font-semibold text-text-default">Bulk Generation Mode</h4>
+               <p class="text-xs text-gray-500">Add multiple stories to process them in a single agentic job.</p>
+                 </div>
 
-          <div>
-            <label for="userStory" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
-              User Story <span class="text-xs text-gray-500">(As a user, I want to...)</span>
-            </label>
-            <textarea id="userStory" rows="4" formControlName="userStory"
-              class="block p-2.5 w-full text-sm rounded-lg border bg-bg-primary border-border-default placeholder-gray-400 text-text-default focus:ring-highlight focus:border-highlight"
-              placeholder="As a user I want to login to the application so that I can access my account..."
-            ></textarea>
-            <p *ngIf="inputForm.controls['userStory'].invalid && inputForm.controls['userStory'].touched"
-               class="mt-1 text-xs text-priority-high">
-              User Story is required.
-            </p>
+          <div formArrayName="stories" class="space-y-6">
+        <div *ngFor="let story of stories.controls; let i = index" [formGroupName]="i" 
+             class="p-6 bg-bg-primary/30 border border-border-default rounded-2xl relative animate-fade-in group">
+          
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-[10px] font-black text-highlight uppercase tracking-widest">User Story #{{ i + 1 }}</span>
+            <button type="button" *ngIf="stories.length > 1" (click)="removeStory(i)" 
+                    class="p-1.5 text-gray-500 hover:text-priority-high hover:bg-priority-high/10 rounded-lg transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
           </div>
 
-          <!-- <div>
-            <label for="testDescription" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
-              Description of Test <span class="text-xs text-gray-500">(Test scope and objectives)</span>
-            </label>
-            <textarea id="testDescription" rows="4" formControlName="testDescription"
-              class="block p-2.5 w-full text-sm rounded-lg border bg-bg-primary border-border-default placeholder-gray-400 text-text-default focus:ring-highlight focus:border-highlight"
-              placeholder="Describe the scope, objectives, and key focus areas for this test..."
-            ></textarea>
-            <p *ngIf="inputForm.controls['testDescription'].invalid && inputForm.controls['testDescription'].touched"
-               class="mt-1 text-xs text-priority-high">
-              Test Description is required.
-            </p>
-          </div> -->
-
+        <div class="space-y-4">
           <div>
-            <label for="acceptanceCriteria" class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">
-              Acceptance Criteria <span class="text-xs text-gray-500">(Given... When... Then...)</span>
-            </label>
-            <textarea id="acceptanceCriteria" rows="6" formControlName="acceptanceCriteria"
-              class="block p-2.5 w-full text-sm rounded-lg border bg-bg-primary border-border-default placeholder-gray-400 text-text-default focus:ring-highlight focus:border-highlight"
-              placeholder="1. The user enters valid username and password..."
-            ></textarea>
-            <p *ngIf="inputForm.controls['acceptanceCriteria'].invalid && inputForm.controls['acceptanceCriteria'].touched"
-               class="mt-1 text-xs text-priority-high">
-              Acceptance Criteria is required.
-            </p>
+            <label class="block mb-1.5 text-xs font-semibold text-gray-500">Story Description</label>
+              <textarea rows="3" formControlName="user_story"
+                class="block p-3 w-full text-sm rounded-xl border bg-bg-primary border-border-default placeholder-gray-600 text-text-default focus:ring-1 focus:ring-highlight outline-none"
+                placeholder="As a user I want to..."></textarea>
+<p *ngIf="story.get('acceptance_criteria')?.invalid && story.get('acceptance_criteria')?.touched"
+   class="mt-1 text-xs text-priority-high">
+  Acceptance Criteria is required.
+</p>
           </div>
+           <div>
+              <label class="block mb-1.5 text-xs font-semibold text-gray-500">Acceptance Criteria</label>
+              <textarea rows="3" formControlName="acceptance_criteria"  
+              class="block p-3 w-full text-sm rounded-xl border bg-bg-primary border-border-default placeholder-gray-600 text-text-default focus:ring-1 focus:ring-highlight outline-none"
+                placeholder="Given... When... Then..."></textarea>
+
+           </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" (click)="addStory()" 
+              class="w-full py-4 mt-4 border-2 border-dashed border-border-default rounded-2xl text-gray-500 font-bold hover:border-highlight hover:text-highlight hover:bg-highlight/5 transition-all flex items-center justify-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        <span>Add Another User Story</span>
+      </button>
         </ng-container>
 
-        <ng-container *ngIf="currentInputType === 'Upload Document'">
+    <ng-container *ngIf="currentInputType === 'Upload Document'">
           
           <div 
             (drop)="onFileDrop($event)" 
@@ -218,13 +222,19 @@ class="block w-full text-sm mt-2">
               </button>
             </div>
           </div>
+
+
           <p *ngIf="inputForm.controls['fileInput'].invalid && inputForm.controls['fileInput'].touched"
                class="mt-1 text-xs text-priority-high">
               At least one file is required for document upload.
           </p>
         </ng-container>
-
-
+        <div class="pt-4 border-t border-border-default">
+        <label class="text-sm font-medium text-gray-500">Target Framework</label>
+        <select formControlName="framework" class="bg-bg-primary border border-gray-700 text-sm rounded-lg w-full px-3 p-2.5 mt-2 text-text-default">
+          <option *ngFor="let fw of frameworkOptions" [value]="fw.value">{{fw.key}}</option>
+        </select>
+    </div>
 
         <div class="flex justify-end pt-4">
           <button type="submit" [disabled]="inputForm.invalid || isLoading"
@@ -255,14 +265,15 @@ class="block w-full text-sm mt-2">
 export class InputRequirementsComponent implements OnInit{
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private api = inject(ApiService);
    @Input() projects: ProjectFolder[] = []; 
    @Output() onCreateNewProject = new EventEmitter<void>();
 
   @Output() generationSuccess = new EventEmitter<any>(); // Emit result to parent
-  
+
   isLoading: boolean = false;
-frameworkOptions: {key:string,value:string}[] = [];
-showOtherFrameworkInput = false;
+  frameworkOptions: {key:string,value:string}[] = [];
+  showOtherFrameworkInput = false;
   inputForm!: FormGroup; 
   uploadedFiles: File[] = [];
   currentInputType: InputType = 'Manual Input';
@@ -298,6 +309,7 @@ frameworkConfig: Record<TestType, any> = {
 
 
 
+  
   ngOnInit(): void {
     this.inputForm = this.fb.group({
       projectId:['',Validators.required], 
@@ -309,95 +321,55 @@ frameworkConfig: Record<TestType, any> = {
       dataModelFile:[null],
       inputType: ['Manual Input', Validators.required],
       framework: ['', Validators.required],
-      userStory: ['', Validators.required],
-      acceptanceCriteria: ['', Validators.required],
-      fileInput: [null as File[] | null]
+      fileInput: [null],
+      stories: this.fb.array([this.createStoryGroup()])
     });
-    // changes in inputType and update validators 
-/* INITIAL FRAMEWORK */
 
-this.frameworkOptions = this.frameworkConfig['functional'];
-this.inputForm.patchValue({
-framework:this.frameworkOptions[0].value
-});/* TEST TYPE CHANGE */
+    this.inputForm.get('inputType')?.valueChanges.subscribe((type) => {
+      this.currentInputType = type;
+      this.updateValidation();
+    });
 
-this.inputForm.get('testType')?.valueChanges.subscribe((type:TestType)=>{
+    this.inputForm.get('testType')?.valueChanges.subscribe((type: TestType) => {
+      this.handleTestTypeChange(type);
+    });
 
-if(type === 'database'){
 
-this.showDatabaseOptions = true;
+this.inputForm.get('framework')?.valueChanges.subscribe(val => {
+      this.showOtherFrameworkInput = val === 'other';
+      this.toggleOtherValidator('otherFramework', val === 'other');
+    });
+    this.inputForm.get('targetDatabase')?.valueChanges.subscribe(val => {
+      this.showOtherDatabaseInput = val === 'other';
+      this.toggleOtherValidator('otherDatabase', val === 'other');
+    });
 
-this.inputForm.get('framework')?.clearValidators();
-
-this.inputForm.get('targetDatabase')?.setValidators(Validators.required);
-this.inputForm.get('dataModelFile')?.setValidators(Validators.required);
-
+this.handleTestTypeChange('functional');
 }
 
-else{
-
-this.showDatabaseOptions = false;
-
-this.frameworkOptions = this.frameworkConfig[type];
-
-this.inputForm.patchValue({
-framework:this.frameworkOptions[0].value
-});
-
-this.inputForm.get('framework')?.setValidators(Validators.required);
-
-}
-
-this.inputForm.get('framework')?.updateValueAndValidity();
-
-});
 
 
-/* OTHER FRAMEWORK */
-
-this.inputForm.get('framework')?.valueChanges.subscribe(val=>{
-
-this.showOtherFrameworkInput = val === 'other';
-
-const control = this.inputForm.get('otherFramework');
-
-if(val === 'other'){
-control?.setValidators(Validators.required);
- this.toaster.show('Custom frameworks will be considered in future releases.', 'success');
-}
-else{
-control?.clearValidators();
-control?.setValue('');
-}
-
-control?.updateValueAndValidity();
-
-});
-
-
-/* OTHER DATABASE */
-
-this.inputForm.get('targetDatabase')?.valueChanges.subscribe(val=>{
-
-this.showOtherDatabaseInput = val === 'other';
-
-const control = this.inputForm.get('otherDatabase');
-
-if(val === 'other'){
-control?.setValidators(Validators.required);
-this.toaster.show('Custom databases will be considered in future releases.', 'success');
-}
-else{
-control?.clearValidators();
-}
-
-control?.updateValueAndValidity();
-
-});
-
-
+  get stories(): FormArray {
+    return this.inputForm.get('stories') as FormArray;
   }
-  onDataModelUpload(event:any){
+    createStoryGroup(): FormGroup {
+      return this.fb.group({
+        user_story: ['', [Validators.required, Validators.minLength(10)]],
+        acceptance_criteria: ['', Validators.required]
+      });
+    }
+  addStory() {
+    this.stories.push(this.createStoryGroup());
+    this.updateValidation();
+  }
+
+  removeStory(index: number) {
+    if (this.stories.length > 1) 
+      this.stories.removeAt(index);
+    
+  }
+
+onDataModelUpload(event:any){
 
 const file = event.target.files[0];
 
@@ -410,34 +382,106 @@ this.inputForm.get('dataModelFile')?.setValue(file);
 }
 
 }
-private updateValidation(type: InputType): void {
-    const userStoryControl = this.inputForm.get('userStory');
-  
-    const acceptanceCriteriaControl = this.inputForm.get('acceptanceCriteria');
-    const fileInputControl = this.inputForm.get('fileInput');
+private updateValidation(): void {
 
-    // Reset all
-    userStoryControl?.clearValidators();
-    // testDescriptionControl?.clearValidators();
-    acceptanceCriteriaControl?.clearValidators();
-    fileInputControl?.clearValidators();
+   
+    const fileControl = this.inputForm.get('fileInput');
+       const storiesArray = this.stories;
 
-    if (type === 'Manual Input') {
-      userStoryControl?.setValidators(Validators.required);
-      // testDescriptionControl?.setValidators(Validators.required);
-      acceptanceCriteriaControl?.setValidators(Validators.required);
-    } else if (type === 'Upload Document') {
-      fileInputControl?.setValidators(Validators.required);
-    }
+    
 
-    userStoryControl?.updateValueAndValidity();
-    //testDescriptionControl?.updateValueAndValidity();
-    acceptanceCriteriaControl?.updateValueAndValidity();
-    fileInputControl?.updateValueAndValidity();
+     if (this.currentInputType === 'Manual Input') {
+      fileControl?.clearValidators();
+       fileControl?.setValue(null);
+       storiesArray.controls.forEach((control, index) => {
+      const group = control as FormGroup;
+      const userStoryControl = group.get('user_story');
+      const acceptanceCriteriaControl = group.get('acceptance_criteria');
+      
+      // Only validate if field is touched or if it's the first story
+      if (index === 0 || userStoryControl?.touched || acceptanceCriteriaControl?.touched) {
+        userStoryControl?.setValidators([Validators.required, Validators.minLength(10)]);
+        acceptanceCriteriaControl?.setValidators(Validators.required);
+      } else {
+        // For untouched stories, validate only if they have content
+        userStoryControl?.setValidators(this.conditionalValidator('minLength', 10));
+        acceptanceCriteriaControl?.setValidators(this.conditionalValidator('required'));
+      }
+      
+      userStoryControl?.updateValueAndValidity();
+      acceptanceCriteriaControl?.updateValueAndValidity();
+    });
+    } else{
+          fileControl?.setValidators(Validators.required);
+     storiesArray.controls.forEach(control => {
+      const group = control as FormGroup;
+      group.get('user_story')?.clearValidators();
+      group.get('acceptance_criteria')?.clearValidators();
+      group.get('user_story')?.updateValueAndValidity();
+      group.get('acceptance_criteria')?.updateValueAndValidity();
+    });
   }
 
+ 
+    //testDescriptionControl?.updateValueAndValidity();
 
+    fileControl?.updateValueAndValidity();
+  }
 
+  private conditionalValidator(type: 'required' | 'minLength', minLen?: number) {
+    return (control: any) => {
+      if (!control.value) return null; // Empty is OK
+      if (type === 'required' && !control.value) return { required: true };
+      if (type === 'minLength' && control.value.length < (minLen || 10)) {
+        return { minlength: { requiredLength: minLen || 10, actualLength: control.value.length } };
+      }
+      return null;
+    };
+  }
+
+  private handleTestTypeChange(type: TestType): void {
+    const fwControl = this.inputForm.get('framework');
+    const dbControl = this.inputForm.get('targetDatabase');
+    const modelControl = this.inputForm.get('dataModelFile');
+    
+    fwControl?.clearValidators();
+    dbControl?.clearValidators();
+    modelControl?.clearValidators();
+  
+    if (type === 'database') {
+      this.showDatabaseOptions = true;
+      dbControl?.setValidators(Validators.required);
+      modelControl?.setValidators(Validators.required);
+      fwControl?.setValue('');
+    } else {
+      this.showDatabaseOptions = false;
+      this.frameworkOptions = this.frameworkConfig[type] || [];
+      fwControl?.setValidators(Validators.required);
+    
+      // Auto-select first option to ensure validity immediately
+      if (this.frameworkOptions.length > 0) {
+        this.inputForm.patchValue({ framework: this.frameworkOptions[0].value }, { emitEvent: false });
+      }
+    }
+
+    // Refresh status
+    fwControl?.updateValueAndValidity();
+    dbControl?.updateValueAndValidity();
+    modelControl?.updateValueAndValidity();
+  }
+
+  private toggleOtherValidator(fieldName: string, shouldValidate: boolean): void {
+    const control = this.inputForm.get(fieldName);
+    if (!control) return;
+
+    if (shouldValidate) {
+      control.setValidators(Validators.required);
+    } else {
+      control.clearValidators();
+      control.setValue('');
+    }
+    control.updateValueAndValidity();
+  }
 
   // --- File Upload Logic ---
 
@@ -496,7 +540,7 @@ private updateValidation(type: InputType): void {
       this.inputForm.markAllAsTouched();
       return;
     }
-
+  this.isLoading = true;
     const val = this.inputForm.value;
     const testTypeMap: any = {
     functional: 'automation_test',
@@ -505,7 +549,7 @@ private updateValidation(type: InputType): void {
     };
 
 
-    this.isLoading = true;
+  
     // const inputType: InputType = val.inputType;
     // const formData = new FormData();
     const selectedProject = this.projects.find(proj => String(proj.id) === String(val.projectId));
@@ -516,44 +560,32 @@ private updateValidation(type: InputType): void {
       const parentProj = this.projects.find(p => String(p.id) === String(selectedProject?.parentId));
       parentName = parentProj?.name ?? null;
     }
-    const frameworkChoice = val.framework === 'other' ? 'other' : val.framework;
+  
+   const framework = val.framework === 'other' ? val.otherFramework : val.framework;
+   const database = val.targetDatabase === 'other' ? val.otherDatabase : val.targetDatabase;
+ 
 
-const payload :any = {
-    project_id:Number(val.projectId),
-    user_story: val.inputType === 'Manual Input' ? val.userStory : 'Document uploaded for analysis.',
-    test_type:testTypeMap[val.testType],
-   
-    acceptance_criteria: val.inputType === 'Manual Input' ? val.acceptanceCriteria : 'Refer to attached files.',
-    framework_choice: val.framework === 'other' ? 'other' : val.framework,
-    user_id: 0, 
-    project_name: isSubProject ? (parentName || '') : (selectedProject?.name || ''),
-    sub_project_name: isSubProject ? selectedProject?.name : null,
-    // description: val.inputType === 'Manual Input' ? val.testDescription : 'Refer to attached files.',
-   
+    const payloads = val.stories.map((story: any) => ({
+      user_story: story.user_story,
+      acceptance_criteria: story.acceptance_criteria,
+      project_id: Number(val.projectId),
+
+      project_name: isSubProject ? '' : selectedProject?.name, // Adjusted based on your logic
+      sub_project_name: isSubProject ? selectedProject?.name : null,
+      test_type: val.testType,
+      framework_choice: framework,
+      input_type: val.inputType,
+      // stories: val.inputType === 'Manual Input' ? val.stories : [],
+      // Database specific
+      target_database: val.testType === 'database' ? (val.targetDatabase === 'other' ? val.otherDatabase : val.targetDatabase) : null,
+      data_model: this.uploadedDataModel||null
+    }));
+     const finalRequest = {
+    payloads: payloads, 
+    data_model_file: this.uploadedDataModel
   };
 
-
-if (val.framework === 'other') {
-  payload.user_request= val.otherFramework;
-}
-
-/* DATABASE PAYLOAD */
-
-if(val.testType === 'database'){
-
-payload.target_database =
-val.targetDatabase === 'other'
-? val.otherDatabase
-: val.targetDatabase;
-
-if(val.targetDatabase === 'other'){
-payload.user_request = val.otherDatabase;
-}
-
-payload.data_model = this.uploadedDataModel;
-
-}
-  this.generationSuccess.emit(payload);
+  this.generationSuccess.emit(finalRequest);
     //  else if (inputType === 'Upload Document') {
     //   // Append all uploaded files to the form data
     //   this.uploadedFiles.forEach((file, index) => {

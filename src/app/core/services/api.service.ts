@@ -51,24 +51,28 @@ loadUserProjects(displayName: string): Observable<ProjectFolder[]> {
  requestOnboarding(payload: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/onboard/request`, payload);
   }
+getAgentTrace(jobId: string) {
+  return this.http.get<any>(`${this.baseUrl}/api/jobs/${jobId}/agent-status`);
+  //  return this.http.get<any>(`${this.baseUrl}/api/jobs/1/agent-status`);
+}
+generateTestCases(requestData: any, userId: number): Observable<any> {
+  const { payloads, data_model_file } = requestData;
 
- generateTestCases(payload: any, userId: number):
-  Observable<any> { 
-  const finalPayload = {
-     ...payload, user_id: userId, 
-   
-    };
-    const formData = new FormData();
+  // Add userId to every item in the array
+  const finalPayloads = payloads.map((p: any) => ({
+    ...p,
+    user_id: userId
+  }));
 
-  // backend expects payload as STRING
-  formData.append('payload', JSON.stringify(finalPayload));
+  const formData = new FormData();
 
-  // attach file if database model exists
-  if (payload.data_model) {
-    formData.append('data_model_file', payload.data_model);
+  // The backend expects the key 'payload' to be a JSON string
+  formData.append('payload', JSON.stringify(finalPayloads));
+
+  // Attach the physical file if it exists
+  if (data_model_file) {
+    formData.append('data_model_file', data_model_file);
   }
-
-  console.log("FormData payload:", finalPayload);
 
   return this.http.post<any>(
     `${this.baseUrl}/api/generate-test-cases`,
@@ -87,9 +91,13 @@ createProject(modalData: { name: string; parentId: string; project_spec?: string
             };
              return this.http.post<any>(`${this.baseUrl}/api/projects/create`, finalPayload);
              }
-  getJobResults(jobId: string): Observable<GenerationResult> {
-     return this.http.get<GenerationResult>(`${this.baseUrl}/api/results/${jobId}`);
-     }
+getJobResults(jobId: string, storyId?: string): Observable<GenerationResult> {
+  let url = `${this.baseUrl}/api/results/${jobId}`;
+  if (storyId) {
+    url += `?story_id=${storyId}`;
+  }
+  return this.http.get<GenerationResult>(url);
+}
 
      getDashboardStats(userId: number): Observable<DashboardData> {
     return this.http.get<DashboardData>(`${this.baseUrl}/api/dashboard/${userId}`);
@@ -112,5 +120,18 @@ createProject(modalData: { name: string; parentId: string; project_spec?: string
   // 3. Approve a request: Backend will move data to 'users' table and send the automated email
   approveOnboarding(requestId: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/admin/onboarding/approve/${requestId}`, {});
+  }
+
+
+  getStories(jobId: number): Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/api/jobs/${jobId}/stories`);
+}
+
+// Fetch the actual test cases/scripts for ONE specific story
+getStoryResults(jobId: number, storyId: string): Observable<any> {
+  return this.http.get<any>(`${this.baseUrl}/api/results/${jobId}?story_id=${storyId}`);
+}
+ getProjectDetails(projectId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/projects/${projectId}/details`);
   }
 }

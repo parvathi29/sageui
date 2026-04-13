@@ -95,6 +95,8 @@ export class ExportDeployComponent {
   @Input({ required: true }) totalAutomationScripts: number = 0;
   @Input() testCases: any[] = []; 
   @Input() automationScripts: any = {};
+  @Input() storyId?: string;
+  @Input() jobId?: string;
   @Output() goBack = new EventEmitter<void>();
   @Output() startNew = new EventEmitter<void>();
   private toaster = inject(ToasterService);

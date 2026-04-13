@@ -1,0 +1,30 @@
+/* Add to landing-page.component.css or styles array */
+// .reveal {
+//   opacity: 0;
+//   transform: translateY(40px);
+//   transition: opacity 0.8s ease-out, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+// }
+
+// .reveal.active {
+//   opacity: 1;
+//   transform: translateY(0);
+// }
+
+/* Optional: Stagger the team icons */
+.team-member:nth-child(2) { transition-delay: 0.1s; }
+.team-member:nth-child(3) { transition-delay: 0.2s; }
+.team-member:nth-child(4) { transition-delay: 0.3s; }
+.faq-content {
+  transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+  /* Use a high enough value for expansion, but ensure it starts at 0 */
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
