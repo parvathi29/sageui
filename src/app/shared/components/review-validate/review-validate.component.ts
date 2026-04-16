@@ -314,15 +314,21 @@ ngOnChanges(changes: SimpleChanges) {
   }
   // Logic Helpers
 private formatScripts(scriptsArr: any[]): any {
-    const scriptObj: any = {};
-    scriptsArr.forEach(s => {
-      scriptObj[s.user_story_id || 'Script'] = {
-        framework: s.framework || 'Selenium',
-        script: Array.isArray(s.script_content) ? s.script_content : (s.script_content || '').split('\n')
+  const scriptObj: any = {};
+
+  scriptsArr.forEach(s => {
+    const scripts = s.script_content || {};
+
+    Object.keys(scripts).forEach((key) => {
+      scriptObj[key] = {
+        framework: scripts[key]?.framework || 'Selenium',
+        script: scripts[key]?.script || []
       };
     });
-    return scriptObj;
-  }
+  });
+
+  return scriptObj;
+}
   trackByKey(index: number, key: string) {
   return key; 
 }
