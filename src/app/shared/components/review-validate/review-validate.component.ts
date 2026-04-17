@@ -315,7 +315,7 @@ ngOnChanges(changes: SimpleChanges) {
   // Logic Helpers
 private formatScripts(scriptsArr: any[]): any {
   const scriptObj: any = {};
-
+  console.log('Formatting scripts:', scriptsArr);
   scriptsArr.forEach(s => {
     const scripts = s.script_content || {};
 
