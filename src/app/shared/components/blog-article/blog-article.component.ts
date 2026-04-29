@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
         <a routerLink="/" fragment="features" class="hover:text-highlight transition-colors">Features</a>
          <a routerLink="/" fragment="capabilities" class="hover:text-highlight transition-colors cursor-pointer">Capabilities</a>
         <a routerLink="/" fragment="resources" class="text-highlight transition-colors">Resources</a>
-        <a routerLink="/" fragment="team" class="hover:text-highlight transition-colors">About</a>
+        <a routerLink="/" fragment="team" class="hover:text-highlight transition-colors">Team</a>
          <a routerLink="/" fragment="faq" class="hover:text-highlight transition-colors cursor-pointer">FAQ</a>
       </nav>
 
