@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Required for ngModel
 import { ToasterService } from '../../../core/services/toaster.service';
-import JSZip from 'jszip';
+import * as JSZip from 'jszip';
 import * as XLSX from 'xlsx';
 // Helper interface for the export options (defined in previous step)
 interface ExportOption {
