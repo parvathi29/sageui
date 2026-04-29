@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, of } from 'rxjs';
@@ -7,7 +8,7 @@ import { catchError, of } from 'rxjs';
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-bg-primary p-6">
       <div class="max-w-xl w-full bg-bg-secondary border border-border-default rounded-3xl p-10 shadow-2xl">
@@ -65,7 +66,7 @@ import { catchError, of } from 'rxjs';
 
           <button
             type="button"
-            (click)="goBack.emit()"
+            routerLink="/"
             class="w-full text-gray-500 text-sm font-medium hover:text-white transition-colors"
           >
             Back to Home

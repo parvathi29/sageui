@@ -24,6 +24,7 @@ import { ToasterComponent } from "../../../toaster/toaster.component";
 import { ToasterService } from '../../../core/services/toaster.service';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 import { ProjectViewComponent } from '../project-view/project-view.component';
+import { ActivatedRoute, Router } from '@angular/router';
 type AppView = 'landing'|'onboarding'|'login'| 'dashboard' | 'project-view'|'new-generation' | 'scheduled-jobs'|'admin'|'project-view'|'review'|'export';
 type TestType = 'Functional' | 'Unit'; 
 @Component({
@@ -58,7 +59,7 @@ type TestType = 'Functional' | 'Unit';
 </app-onboarding>
   <app-login *ngIf="currentView() === 'login'" (loginSuccess)="handleLogin($event)"></app-login>
 
- <div *ngIf="currentView() !== 'login' && currentView() !== 'onboarding'" class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
+ <div *ngIf="currentView() !== 'login' && currentView() !== 'onboarding' && currentView() !== 'landing'"  class="min-h-screen flex flex-col transition-colors duration-300 bg-bg-primary text-text-default">
       <header class="h-16 bg-bg-secondary border-b border border-border-default flex items-center justify-between  px-8 sticky top-0 z-10 transition-colors duration-300">
          <div class="flex w-full items-center justify-between">
           <div class="flex items-center space-x-2">
@@ -350,7 +351,7 @@ export class TestAutomationShellComponent {
   theme=inject(ThemeService);
   http = inject(HttpClient);
   activeStoryData: any = null;
-  currentView = signal<AppView>('landing');
+  currentView = signal<AppView>('login');
   currentStep: number = 1;
   receivedData: any = null; 
   currentTestType: TestType = 'Functional';
@@ -372,7 +373,7 @@ projects = signal<ProjectFolder[]>([
 currentUser = signal<UserSession | null>(null);
   projectData: any = null;
 
-constructor(private apiService: ApiService) {}
+constructor(private apiService: ApiService,private router: Router,private route: ActivatedRoute) {}
 
 
 private addToParent(
@@ -406,6 +407,13 @@ ngOnInit() {
     window.addEventListener('force-logout-payment', () => {
       this.handleLockdown();
     });
+      this.route.queryParams.subscribe(params => {
+    if (params['view'] === 'onboarding') {
+      this.currentView.set('onboarding');
+    } else {
+      this.currentView.set('login'); // default
+    }
+  });
   }
 
 
@@ -735,12 +743,13 @@ logout(): void {
   this.projects.set([]);
   
   // 2. Reset view to login
-  this.currentView.set('landing');
+  // this.currentView.set('landing');
   this.currentStep = 0;
   this.showUserMenu.set(false);
   
   // 3. Clear any local storage if used
   localStorage.removeItem('user_session');
+   this.router.navigate(['/']);
   console.log('User logged out successfully');
 }
 handleTryDemo() {

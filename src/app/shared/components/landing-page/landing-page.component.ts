@@ -1,26 +1,40 @@
 import { Component, Output, EventEmitter, inject,AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, Meta, SafeHtml, Title } from '@angular/platform-browser';
+import { BLOG_POSTS } from '../../../core/data/blog-post';
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <!-- <div [ngClass]="theme.isDarkTheme() ? 'dark' : ''" class="min-h-screen font-inter selection:bg-highlight/30"> -->
          <div [ngClass]="theme.isDarkTheme() ? 'dark' : ''"  class="min-h-screen font-inter selection:bg-highlight/30 ">
-      <!-- <header class="fixed top-0 w-full z-[100] backdrop-blur-md border-b border-border-default bg-bg-secondary/80 h-20 flex items-center px-8 justify-between">
-        <div class="flex items-center space-x-2">
-          <img src="/assets/Sagescript-logo.png" alt="SageScript Logo" class="h-10">
-        </div>
-        <div class="flex items-center space-x-6">
-          <button (click)="theme.toggleTheme()" class="p-2 rounded-full hover:bg-highlight/10 text-gray-500 transition-colors">
-             <svg *ngIf="theme.isDarkTheme()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2"/></svg>
-             <svg *ngIf="!theme.isDarkTheme()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2"/></svg>
-          </button>
-          <button class="bg-highlight hover:bg-purple-700 text-white px-6 py-2.5 rounded-full font-bold transition-all shadow-lg shadow-highlight/20">Get Started</button>
-        </div>
-      </header> -->
+<header class="fixed top-0 w-full z-[100] backdrop-blur-md border-b border-border-default bg-bg-secondary/80 h-20 flex items-center px-8 justify-between">
+  <div class="flex items-center space-x-2 cursor-pointer" routerLink="/">
+    <img src="/assets/Sagescript-logo.png" alt="SageScript Logo" class="h-10">
+  </div>
+
+  <nav class="hidden md:flex items-center space-x-8 text-sm font-bold uppercase tracking-widest text-gray-500">
+    <a routerLink="/" fragment="features" class="hover:text-highlight transition-colors cursor-pointer">Features</a>
+    <a routerLink="/" fragment="capabilities" class="hover:text-highlight transition-colors cursor-pointer">Capabilities</a>
+     <a routerLink="/" fragment="resources" class="hover:text-highlight transition-colors">Resources</a>
+    <a routerLink="/" fragment="team" class="hover:text-highlight transition-colors cursor-pointer">Team</a>
+   
+    <a routerLink="/" fragment="faq" class="hover:text-highlight transition-colors cursor-pointer">FAQ</a>
+  </nav>
+
+  <div class="flex items-center space-x-6">
+    <button (click)="theme.toggleTheme()" class="p-2 rounded-full hover:bg-highlight/10 text-gray-500 transition-colors">
+            <svg *ngIf="theme.isDarkTheme()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2"/></svg>
+            <svg *ngIf="!theme.isDarkTheme()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2"/></svg>
+        </button>
+    <button routerLink="/app" class="bg-highlight hover:bg-purple-700 text-white px-6 py-2.5 rounded-full font-bold transition-all shadow-lg shadow-highlight/20">
+      Get Started
+    </button>
+  </div>
+</header>
 
       <main class="bg-bg-primary text-text-default">
         
@@ -44,13 +58,13 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               Your AI-powered QA assistant. Transform user stories into comprehensive test cases and automation scripts — instantly.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-              <button (click)="getStarted.emit()" class="w-full sm:w-auto px-10 py-4 bg-highlight text-white rounded-2xl font-black shadow-2xl hover:scale-105 transition-transform">Get Started</button>
-              <button (click)="tryDemo.emit()"class="w-full sm:w-auto px-10 py-4 border border-border-default rounded-2xl font-black hover:bg-bg-secondary transition-all">Try Demo</button>
+              <button routerLink="/app" class="w-full sm:w-auto px-10 py-4 bg-highlight text-white rounded-2xl font-black shadow-2xl hover:scale-105 transition-transform">Get Started</button>
+              <button [routerLink]="['/app']" [queryParams]="{ view: 'onboarding' }" class="w-full sm:w-auto px-10 py-4 border border-border-default rounded-2xl font-black hover:bg-bg-secondary transition-all">Try Demo</button>
             </div>
           </div>
         </section>
 
-         <section class="reveal relative bg-bg-secondary/60 border-y border-border-default py-32 px-6 flex flex-col items-center text-center overflow-hidden">
+         <section id="walkthrough" class="reveal relative bg-bg-secondary/60 border-y border-border-default py-32 px-6 flex flex-col items-center text-center overflow-hidden">
           
           <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-highlight/5 blur-[160px] rounded-full z-0"></div>
 
@@ -89,7 +103,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           </div>
         </section>
 
-        <section class="reveal max-w-7xl mx-auto px-6 py-24">
+        <section id="capabilities" class="reveal max-w-7xl mx-auto px-6 py-24">
           <div class="text-center mb-16">
              <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Capabilities</span>
              <h2 class="text-4xl md:text-5xl font-black mt-2">Everything You Need to <span class="text-highlight">Ship Quality</span></h2>
@@ -105,9 +119,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           </div>
         </section>
 
-         <section class="py-24 space-y-32">
+         <section id="features" class="py-24 space-y-32 overflow-hidden">
           <div *ngFor="let feat of features; let i = index" class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <div [ngClass]="{'md:order-2': i % 2 !== 0}" class="bg-bg-secondary p-4 rounded-[40px] border border-border-default aspect-video flex items-center justify-center">
+             <div [ngClass]="{'md:order-2': i % 2 !== 0}" class="relative group bg-bg-secondary p-4 rounded-[40px] border border-border-default aspect-video flex items-center justify-center overflow-hidden">
+          <!-- <div [ngClass]="{'md:order-2': i % 2 !== 0}" class="bg-bg-secondary p-4 rounded-[40px] border border-border-default aspect-video flex items-center justify-center"> -->
               <div class="absolute -inset-4 bg-highlight/20 rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div class="relative bg-bg-secondary border border-border-default p-4 rounded-[40px] shadow-2xl overflow-hidden">
                 <div class="bg-bg-primary aspect-video rounded-[30px] flex items-center justify-center border border-border-default overflow-hidden">
@@ -137,7 +152,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           </div>
         </section> -->
 
-        <section reveal class="max-w-7xl mx-auto px-6 py-24">
+        <section id="benefits" class="reveal max-w-7xl mx-auto px-6 py-24">
            <div class="text-center mb-16">
               <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Why SageScript</span>
               <h2 class="text-4xl md:text-5xl font-black mt-2">Built for <span class="text-highlight">Speed & Scale</span></h2>
@@ -153,6 +168,30 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
            </div>
         </section>
 
+<section id="resources" class="reveal max-w-7xl mx-auto px-6 py-24 border-t border-border-default">
+  <div class="text-center mb-16">
+    <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Insights</span>
+    <h2 class="text-5xl font-black mt-4">The Future of <span class="text-highlight">Autonomous QA</span></h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Loop through only the first 3 articles for the landing page preview -->
+    <div *ngFor="let post of featuredPosts" 
+         class="bg-bg-secondary border border-border-default rounded-[32px] overflow-hidden hover:border-highlight/50 transition-all group cursor-pointer"
+         [routerLink]="['/resources', post.slug]">
+      
+      <div class="p-8 space-y-4">
+        <span class="text-highlight text-[10px] font-black uppercase tracking-widest">{{ post.category }}</span>
+        <h3 class="text-xl font-black group-hover:text-highlight transition-colors">{{ post.title }}</h3>
+        <p class="text-gray-500 text-sm line-clamp-3">{{ post.description }}</p>
+        
+        <div class="pt-4 flex items-center text-highlight font-bold text-xs uppercase">
+          Read Article <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-width="2"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 
         <!-- <section class="reveal max-w-7xl mx-auto px-6 py-32 border-t border-border-default">
@@ -182,7 +221,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   </div>
 </section> -->
 
-<section class="reveal bg-bg-secondary/30 py-32">
+<section id="team" class="reveal bg-bg-secondary/30 py-32">
   <div class="max-w-7xl mx-auto px-6 text-center">
     <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Our Team</span>
     <h2 class="text-5xl font-black mt-4 mb-20 text-text-default leading-tight">The Minds Behind <span class="text-highlight">SageScript</span></h2>
@@ -201,7 +240,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   </div>
 </section>
 
-<section class="reveal py-40 px-6 text-center overflow-hidden relative">
+<section id="cta" class="reveal py-40 px-6 text-center overflow-hidden relative">
   <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-highlight/10 blur-[150px] rounded-full"></div>
   <div class="relative z-10">
     <h2 class="text-6xl font-black leading-tight mb-8">Ready to Automate <br><span class="text-highlight">Smarter?</span></h2>
@@ -212,7 +251,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   </div>
 </section>
 
-<section class="reveal max-w-4xl mx-auto px-6 py-32">
+<section id="faq" class="reveal max-w-4xl mx-auto px-6 py-32">
   <div class="text-center mb-16">
     <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">FAQ</span>
     <h2 class="text-5xl font-black mt-4 text-text-default">Common Questions</h2>
@@ -314,8 +353,8 @@ export class LandingPageComponent implements AfterViewInit{
   theme = inject(ThemeService);
     @Output() getStarted = new EventEmitter<void>();
     @Output() tryDemo = new EventEmitter<void>();
-    
-sanitizer = inject(DomSanitizer);
+   featuredPosts = BLOG_POSTS; 
+   sanitizer = inject(DomSanitizer);
   capabilities = [
     { title: 'The Bulk Intelligence Engine', desc: 'Process multiple user stories simultaneously with parallel AI agents delivering comprehensive test suites.', icon: this.sanitizer.bypassSecurityTrustHtml('<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2"/>') },
     { title: 'Transparent Agentic Reasoning', desc: 'Watch AI agents think in real-time — trace logic mapping, edge case detection, and data model validation.', icon:this.sanitizer.bypassSecurityTrustHtml( '<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2"/>' )},
@@ -402,6 +441,14 @@ sanitizer = inject(DomSanitizer);
   toggleFaq(index: number) {
     this.activeFaqIndex = this.activeFaqIndex === index ? null : index;
   }
+
+constructor(private title: Title, private meta: Meta) {
+  this.title.setTitle('SageScript | Agentic AI Test Automation');
+  this.meta.updateTag({ 
+    name: 'description', 
+    content: 'The first agentic test platform that transforms requirements into production-ready test suites in seconds.' 
+  });
+}
   ngAfterViewInit() {
     // We look for the scroll container in the Shell component
     const scrollContainer = document.querySelector('.custom-scrollbar');

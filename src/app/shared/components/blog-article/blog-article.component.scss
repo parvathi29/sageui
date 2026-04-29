@@ -1,0 +1,29 @@
+// blog-article.component.scss
+.blog-content {
+  ::ng-deep {
+    h2 {
+      @apply text-3xl font-black text-text-default pt-10 pb-4 tracking-tighter;
+    }
+    p {
+      @apply mb-6;
+    }
+    strong, b {
+      @apply text-text-default font-black;
+    }
+    .text-highlight {
+       color: #8b7bfd; // Use your exact highlight color variable
+    }
+    blockquote {
+      @apply border-l-4 border-highlight bg-bg-secondary/50 p-8 my-10 italic rounded-r-2xl text-text-default font-bold;
+    }
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
