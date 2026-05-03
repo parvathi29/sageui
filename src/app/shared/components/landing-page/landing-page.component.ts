@@ -89,13 +89,20 @@ import { BLOG_POSTS } from '../../../core/data/blog-post';
               <div class="relative z-10 h-full w-full bg-bg-secondary border border-border-default p-4 rounded-[40px] shadow-2xl overflow-hidden active:scale-[0.99] transition-transform">
                 
                 <div class="h-full w-full bg-bg-primary rounded-[30px] border border-border-default overflow-hidden flex items-center justify-center relative">
-                   <video #walkthroughVideo 
+                   <!-- <video #walkthroughVideo 
                           class="w-full h-full object-cover"
                           controls
                           poster="/assets/video-poster.png">
                      <source src="/assets/tool-video.mp4" type="video/mp4">
                      Your browser does not support the video tag.
-                   </video>
+                   </video> -->
+                   <iframe src="https://app.supademo.com/embed/cmoq6f7p62k8kw9doord29tjr?embed_v=2&utm_source=embed"
+
+  
+  class="w-full h-full border-none"
+  allow="clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+  allowfullscreen>
+</iframe>
                 </div>
               </div>
             </div>
@@ -124,11 +131,11 @@ import { BLOG_POSTS } from '../../../core/data/blog-post';
              <div [ngClass]="{'md:order-2': i % 2 !== 0}" class="relative group bg-bg-secondary p-4 rounded-[40px] border border-border-default aspect-video flex items-center justify-center overflow-hidden">
           <!-- <div [ngClass]="{'md:order-2': i % 2 !== 0}" class="bg-bg-secondary p-4 rounded-[40px] border border-border-default aspect-video flex items-center justify-center"> -->
               <div class="absolute -inset-4 bg-highlight/20 rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div class="relative bg-bg-secondary border border-border-default p-4 rounded-[40px] shadow-2xl overflow-hidden">
+              <!-- <div class="relative bg-bg-secondary border border-border-default p-4 rounded-[40px] shadow-2xl overflow-hidden"> -->
                 <div class="bg-bg-primary aspect-video rounded-[30px] flex items-center justify-center border border-border-default overflow-hidden">
                    <img [src]="feat.img" class="w-full h-full object-cover">
                 </div>
-              </div>
+              <!-- </div> -->
             </div>
             <div class="space-y-6">
               <span class="px-4 py-1.5 bg-highlight/10 text-highlight text-[10px] font-black uppercase rounded-lg tracking-widest">{{feat.tag}}</span>
@@ -363,10 +370,10 @@ export class LandingPageComponent implements AfterViewInit{
   ];
 
   features = [
-    { tag: 'Bulk Processing', title: 'Bulk Story Processing: From Backlog to Script', desc: 'Stop wasting hours on manual entry. SageScript Bulk Generation Mode allows you to input multiple stories and acceptance criteria simultaneously.', img: '/assets/feat-bulk.png' },
-    { tag: 'Radical Transparency', title: 'Watch the AI Think: Live Agent Trace', desc: 'Open the Agent Status Modal to witness the live thought process of our Quality Strategist and Automation Builder agents.', img: '/assets/feat-trace.png' },
-    { tag: 'The Command Center', title: 'Unified Dashboard & History', desc: 'Track the entire quality history of your enterprise projects. Our folder system ensures maintainable organization at any volume.', img: '/assets/feat-dash.png' },
-    { tag: 'CI/CD Ready', title: 'GitHub & Jira Ecosystem', desc: 'Don\'t just generate—deploy. Export framework-specific bundles and push code directly to your repositories in under 60 seconds.', img: '/assets/feat-git.png' }
+    { tag: 'Bulk Processing', title: 'Bulk Story Processing: From Backlog to Script', desc: 'Stop wasting hours on manual entry. SageScript Bulk Generation Mode allows you to input multiple stories and acceptance criteria simultaneously.', img: '/assets/bulk.jpg' },
+    { tag: 'Radical Transparency', title: 'Watch the AI Think: Live Agent Trace', desc: 'Open the Agent Status Modal to witness the live thought process of our Quality Strategist and Automation Builder agents.', img: '/assets/agent.jpg' },
+    { tag: 'The Command Center', title: 'Unified Dashboard & History', desc: 'Track the entire quality history of your enterprise projects. Our folder system ensures maintainable organization at any volume.', img: '/assets/dash.jpg' },
+    { tag: 'CI/CD Ready', title: 'GitHub & Jira Ecosystem', desc: 'Don\'t just generate—deploy. Export framework-specific bundles and push code directly to your repositories in under 60 seconds.', img: '/assets/jira.jpg' }
   ];
 
   stats = [
