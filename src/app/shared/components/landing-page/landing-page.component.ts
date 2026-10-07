@@ -228,24 +228,98 @@ import { BLOG_POSTS } from '../../../core/data/blog-post';
   </div>
 </section> -->
 
+
 <section id="team" class="reveal bg-bg-secondary/30 py-32">
-  <div class="max-w-7xl mx-auto px-6 text-center">
-    <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Our Team</span>
-    <h2 class="text-5xl font-black mt-4 mb-20 text-text-default leading-tight">The Minds Behind <span class="text-highlight">SageScript</span></h2>
+  <div class="max-w-6xl mx-auto px-6">
     
-    <div class="flex flex-wrap justify-center gap-12 md:gap-24">
-      <div *ngFor="let member of team" class="flex flex-col items-center group">
-        <div class="w-24 h-24 rounded-full bg-highlight flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-highlight/30 group-hover:scale-110 transition-all cursor-pointer">
-          {{member.initials}}
-        </div>
-        <div class="mt-6 flex flex-col">
-          <span class="font-black text-xl text-text-default">{{member.name}}</span>
-          <span class="text-xs text-highlight font-black uppercase tracking-widest mt-1">{{member.title}}</span>
+    <div class="text-center mb-16">
+      <span class="text-highlight font-black uppercase text-[10px] tracking-[0.3em]">Our Team</span>
+      <h2 class="text-5xl md:text-6xl font-black mt-4 text-text-default leading-tight">
+        Who <span class="text-highlight">are we</span>
+      </h2>
+    </div>
+
+    <div class="bg-bg-secondary/60 backdrop-blur-xl border border-border-default rounded-[40px] p-8 md:p-12 lg:p-16 shadow-xl">
+      
+      <div class="space-y-8 text-gray-500 text-lg leading-relaxed">
+        <p>
+          SageScript is built by a U.S.-based, Service-Disabled Veteran-Owned Small Business (SDVOSB) team with deep experience across enterprise software engineering, quality assurance, test automation, product delivery, cloud technologies, DevOps, healthcare technology, and artificial intelligence.
+        </p>
+
+        <p>
+          We understand enterprise software delivery because we have worked inside complex technology organizations and experienced many of the same challenges our customers face — lengthy testing cycles, manual test creation, inconsistent requirements, growing automation backlogs, integration complexity, and constant pressure to deliver faster without sacrificing quality.
+        </p>
+
+        <p>
+          SageScript was created to solve those real-world problems.
+        </p>
+
+        <p>
+          By combining practical enterprise delivery experience with Agentic AI, SageScript helps product, engineering, and QA teams transform requirements into comprehensive test cases and executable automation faster, while improving consistency, coverage, and traceability throughout the software development lifecycle.
+        </p>
+      </div>
+
+      <div class="mt-14 pt-12 border-t border-border-default">
+        <h3 class="text-3xl md:text-4xl font-black text-text-default mb-8">
+          Why <span class="text-highlight">SageScript</span>
+        </h3>
+
+        <div class="space-y-6 text-gray-500 text-lg leading-relaxed">
+          <p>
+            We are not simply building another AI tool. We are applying AI to problems we understand firsthand.
+          </p>
+
+          <p>
+            Our background includes:
+          </p>
+
+          <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Enterprise software delivery and engineering</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Quality assurance and test automation</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Product and application development</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Complex system integrations</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Cloud and DevOps environments</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Healthcare and other highly regulated environments</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>AI-enabled software development</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-highlight font-black mr-3">✓</span>
+              <span>Large-scale digital transformation</span>
+            </li>
+          </ul>
+
+          <p class="pt-4">
+            As an SDVOSB, we also bring the discipline, accountability, service mindset, and mission focus associated with veteran-owned organizations.
+          </p>
         </div>
       </div>
+
     </div>
   </div>
 </section>
+
+    
+       
 
 <section id="cta" class="reveal py-40 px-6 text-center overflow-hidden relative">
   <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-highlight/10 blur-[150px] rounded-full"></div>
